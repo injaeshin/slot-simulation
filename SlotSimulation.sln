@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LottaCashMummy", "LottaCashMummy\LottaCashMummy.csproj", "{39500F69-06A3-4B93-A273-ED67C4860D7D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelExport", "ExcelExporter\ExcelExport.csproj", "{9DDBC4DB-3FDA-4F60-A9DD-0986515D9745}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LottaCashMummy.Tests", "LottaCashMummy.Tests\LottaCashMummy.Tests.csproj", "{61F1C56E-A2D7-4ED2-8BE6-C778370D5E6D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{39500F69-06A3-4B93-A273-ED67C4860D7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39500F69-06A3-4B93-A273-ED67C4860D7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39500F69-06A3-4B93-A273-ED67C4860D7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39500F69-06A3-4B93-A273-ED67C4860D7D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9DDBC4DB-3FDA-4F60-A9DD-0986515D9745}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DDBC4DB-3FDA-4F60-A9DD-0986515D9745}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DDBC4DB-3FDA-4F60-A9DD-0986515D9745}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DDBC4DB-3FDA-4F60-A9DD-0986515D9745}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61F1C56E-A2D7-4ED2-8BE6-C778370D5E6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61F1C56E-A2D7-4ED2-8BE6-C778370D5E6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61F1C56E-A2D7-4ED2-8BE6-C778370D5E6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61F1C56E-A2D7-4ED2-8BE6-C778370D5E6D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
