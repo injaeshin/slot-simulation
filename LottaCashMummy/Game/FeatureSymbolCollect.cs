@@ -67,10 +67,12 @@ public class FeatureSymbolCollect
 
             if (symbol.First.Type == FeatureSymbolType.Gem)
             {
+                fs.CollectSymbolValue(idx, symbol.First);
                 fs.CollectSymbol(idx, symbol.First);
             }
             else if (symbol.Second.Type == FeatureSymbolType.Gem)
             {
+                fs.CollectSymbolValue(idx, symbol.First);
                 fs.CollectSymbol(idx, symbol.Second);
             }
 

@@ -87,7 +87,6 @@ public class SymbolPair
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddSymbol(FeatureSymbolType type, FeatureBonusValueType bonusType, double value)
     {
-        // 분기문 최소화를 위한 비트 연산
         var target = first.Type == FeatureSymbolType.None ? first : second;
         target.Set(type, bonusType, value);
     }
@@ -118,6 +117,4 @@ public class SymbolPair
         first.Clear();
         second.Clear();
     }
-
-
 }

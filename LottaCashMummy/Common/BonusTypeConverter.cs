@@ -4,6 +4,23 @@ namespace LottaCashMummy.Common;
 
 public static class BonusTypeConverter
 {
+    // 비트 플래그 타입의 올바른 순서와 값을 매핑
+    public static readonly Dictionary<FeatureBonusType, int> CombiTypeOrder = new Dictionary<FeatureBonusType, int>
+    {
+        { FeatureBonusType.Collect, 1 },
+        { FeatureBonusType.Spins, 2 },
+        { FeatureBonusType.Symbols, 3 },
+        { FeatureBonusType.CollectSpins, 4 },
+        { FeatureBonusType.CollectSymbols, 5 },
+        { FeatureBonusType.SpinsSymbols, 6 },
+        { FeatureBonusType.CollectSpinsSymbols, 7 }
+    };
+
+    public static int GetCombiTypeOrder(FeatureBonusType bonusType)
+    {
+        return CombiTypeOrder[bonusType];
+    }
+
     private static readonly Dictionary<(FeatureBonusType, bool), FeatureBonusCombiType> CombiTypeMap = new()
     {
         // 단일 기능

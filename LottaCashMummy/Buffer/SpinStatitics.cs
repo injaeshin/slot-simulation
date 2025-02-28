@@ -1,140 +1,175 @@
 ﻿using LottaCashMummy.Common;
-
 using System.Runtime.CompilerServices;
+
+using StatsDict = LottaCashMummy.Common.StatsDictionary<(int, int), double>;
 
 namespace LottaCashMummy.Buffer;
 
-public class Feature
+public class SlotStats<TDictImpl> where TDictImpl : IStatsDictionary<(int, int), double>, new()
 {
-    private static readonly IEnumerable<FeatureBonusType> BonusTypesRange = Enum.GetValues(typeof(FeatureBonusType))
-        .Cast<FeatureBonusType>()
-        .Where(x => x != FeatureBonusType.None);
-    private static readonly int[] LevelsRange = [1, 2, 3, 4];
-    private static readonly int[] InitGemCountsRange = [0, 1, 2, 3, 4, 5];
+    private readonly TDictImpl spinCounts = new();
+    public TDictImpl SpinCounts => spinCounts;
 
-    // 입장 수
-    private readonly Dictionary<(FeatureBonusType type, int level, int initGemCount), long> enterCount;
-    public Dictionary<(FeatureBonusType type, int level, int initGemCount), long> EnterCount => enterCount;
+    private readonly TDictImpl respinCounts = new();
+    public TDictImpl RespinCounts => respinCounts;
 
-    // 스핀 카운트
-    private readonly Dictionary<(FeatureBonusType type, int level, int initGemCount), long> spinCount;
-    public Dictionary<(FeatureBonusType type, int level, int initGemCount), long> SpinCount => spinCount;
+    private readonly TDictImpl levelUpCounts = new();
+    public TDictImpl LevelUpCounts => levelUpCounts;
 
-    // 레드 코인 카운트
-    private readonly Dictionary<(FeatureBonusType type, int level, int initGemCount), long> redCoinCount;
-    public Dictionary<(FeatureBonusType type, int level, int initGemCount), long> RedCoinCount => redCoinCount;
+    private readonly TDictImpl createGemCount = new();
+    public TDictImpl CreateGemCount => createGemCount;
 
-    // 리스핀 카운트
-    private readonly Dictionary<(FeatureBonusType type, int level, int initGemCount), long> respinCount;
-    public Dictionary<(FeatureBonusType type, int level, int initGemCount), long> RespinCount => respinCount;
+    private readonly TDictImpl obtainGemValue = new();
+    public TDictImpl ObtainGemValue => obtainGemValue;
 
-    // 레벨 업 카운트
-    private readonly Dictionary<(FeatureBonusType type, int level, int initGemCount), long> levelUpCount;
-    public Dictionary<(FeatureBonusType type, int level, int initGemCount), long> LevelUpCount => levelUpCount;
+    private readonly TDictImpl createCoinCountA = new();
+    public TDictImpl CreateCoinCountA => createCoinCountA;
 
-    // 젬 생성 카운트
-    private readonly Dictionary<(FeatureBonusType type, int level, int initGemCount), long> createGemCount;
-    public Dictionary<(FeatureBonusType type, int level, int initGemCount), long> CreateGemCount => createGemCount;
+    private readonly TDictImpl createCoinCountB = new();
+    public TDictImpl CreateCoinCountB => createCoinCountB;
 
-    public Feature()
-    {
-        enterCount = new();
-        spinCount = new();
-        redCoinCount = new();
-        respinCount = new();
-        levelUpCount = new();
-        createGemCount = new();
+    private readonly TDictImpl obtainCoinValueA = new();
+    public TDictImpl ObtainCoinValueA => obtainCoinValueA;
 
-        foreach (FeatureBonusType bonusType in BonusTypesRange)
-        {
-            foreach (int level in LevelsRange)
-            {
-                foreach (int initGemCount in InitGemCountsRange)
-                {
-                    enterCount[(bonusType, level, initGemCount)] = 0;
-                    spinCount[(bonusType, level, initGemCount)] = 0;
-                    redCoinCount[(bonusType, level, initGemCount)] = 0;
-                    respinCount[(bonusType, level, initGemCount)] = 0;
-                    levelUpCount[(bonusType, level, initGemCount)] = 0;
-                    createGemCount[(bonusType, level, initGemCount)] = 0;
-                }
-            }
-        }
-    }
+    private readonly TDictImpl obtainCoinValueB = new();
+    public TDictImpl ObtainCoinValueB => obtainCoinValueB;
+
+    private readonly TDictImpl redCoinCount = new();
+    public TDictImpl RedCoinCount => redCoinCount;
+
+    private readonly TDictImpl freeSpinCoinCount = new();
+    public TDictImpl FreeSpinCoinCount => freeSpinCoinCount;
 
     public void Clear()
     {
-        foreach (var key in enterCount.Keys) enterCount[key] = 0;
-        foreach (var key in spinCount.Keys) spinCount[key] = 0;
-        foreach (var key in redCoinCount.Keys) redCoinCount[key] = 0;
-        foreach (var key in respinCount.Keys) respinCount[key] = 0;
-        foreach (var key in levelUpCount.Keys) levelUpCount[key] = 0;
-        foreach (var key in createGemCount.Keys) createGemCount[key] = 0;
+        spinCounts.Clear();
+        respinCounts.Clear();
+        levelUpCounts.Clear();
+        createCoinCountA.Clear();
+        createCoinCountB.Clear();
+        obtainCoinValueA.Clear();
+        obtainCoinValueB.Clear();
+        createGemCount.Clear();
+        obtainGemValue.Clear();
+        redCoinCount.Clear();
+        freeSpinCoinCount.Clear();
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void AddEnterCount(FeatureBonusType bonusType, int level, int initGemCount)
+    public void IncrementSpinCount(int level, int gems)
     {
-        enterCount[(bonusType, level, initGemCount)]++;
+        spinCounts.AddOrUpdate((level, gems), 1, (k, v) => v + 1);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void AddLevelSpinCount(FeatureBonusType bonusType, int level, int initGemCount)
+    public void IncrementRespinCount(int level, int gems)
     {
-        spinCount[(bonusType, level, initGemCount)]++;
+        respinCounts.AddOrUpdate((level, gems), 1, (k, v) => v + 1);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void AddRedCoinCount(FeatureBonusType bonusType, int level, int initGemCount)
+    public void IncrementLevelUpCount(int level, int gems)
     {
-        redCoinCount[(bonusType, level, initGemCount)]++;
+        levelUpCounts.AddOrUpdate((level, gems), 1, (k, v) => v + 1);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void AddRespinCount(FeatureBonusType bonusType, int level, int initGemCount)
+    public void IncrementCreateCoinCount(FeatureBonusType type, int level, int gems)
     {
-        respinCount[(bonusType, level, initGemCount)]++;
+        var withRedCoin = (type & FeatureBonusType.Collect) == FeatureBonusType.Collect;
+        if (withRedCoin)
+        {
+            createCoinCountA.AddOrUpdate((level, gems), 1, (k, v) => v + 1);
+        }
+        else
+        {
+            createCoinCountB.AddOrUpdate((level, gems), 1, (k, v) => v + 1);
+        }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void AddLevelUpCount(FeatureBonusType bonusType, int level, int initGemCount)
+    public void IncrementObtainCoinValue(FeatureBonusType type, int level, int gems, double value)
     {
-        levelUpCount[(bonusType, level, initGemCount)]++;
+        var withRedCoin = (type & FeatureBonusType.Collect) == FeatureBonusType.Collect;
+        if (withRedCoin)
+        {
+            obtainCoinValueA.AddOrUpdate((level, gems), value, (k, v) => v + value);
+        }
+        else
+        {
+            obtainCoinValueB.AddOrUpdate((level, gems), value, (k, v) => v + value);
+        }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void AddCreateGemCount(FeatureBonusType bonusType, int level, int initGemCount)
+    public void IncrementCreateGemCount(int level, int gems)
     {
-        createGemCount[(bonusType, level, initGemCount)]++;
+        createGemCount.AddOrUpdate((level, gems), 1, (k, v) => v + 1);
+    }
+
+    public void IncrementObtainGemValue(int level, int gems, double value)
+    {
+        obtainGemValue.AddOrUpdate((level, gems), value, (k, v) => v + value);
+    }
+
+    public void IncrementRedCoinCount(int level, int gems)
+    {
+        redCoinCount.AddOrUpdate((level, gems), 1, (k, v) => v + 1);
+    }
+
+    public void IncrementFreeSpinCoinCount(int level, int gems)
+    {
+        freeSpinCoinCount.AddOrUpdate((level, gems), 1, (k, v) => v + 1);
     }
 }
 
-// statistics
 public class SpinStatistics
 {
-    private readonly Feature feature;
-    public Feature Feature => feature;
+    //private FeatureBonusCombiType featureBonusCombiType;
+    //public FeatureBonusCombiType FeatureBonusCombiType => featureBonusCombiType;
 
-    private readonly int[,] winPayTable;
-    public int[,] WinPayTable => winPayTable;
+    private readonly StatsMatrix<int> baseWinStats;
+    public IStatsMatrix<int> BaseWinStats => baseWinStats;
+
+    private readonly List<SlotStats<StatsDict>> featureCounts;
+    public List<SlotStats<StatsDict>> FeatureCounts => featureCounts;
+
+    private long baseWinAmount;
+    public long BaseWinAmount => baseWinAmount;
 
     public SpinStatistics()
     {
-        winPayTable = new int[SlotConst.PAYTABLE_SYMBOL, SlotConst.MAX_HITS];
+        baseWinStats = new StatsMatrix<int>(SlotConst.PAYTABLE_SYMBOL, SlotConst.MAX_HITS);
 
-        feature = new Feature();
+        featureCounts = new List<SlotStats<StatsDict>>();
+        for (int i = 0; i < BonusTypeConverter.CombiTypeOrder.Count; i++)
+        {
+            featureCounts.Add(new SlotStats<StatsDict>());
+        }
+
+        baseWinAmount = 0;
+    }
+
+    public SlotStats<StatsDict> GetFeatureStats(FeatureBonusType featureBonusType)
+    {
+        var idx = BonusTypeConverter.GetCombiTypeOrder(featureBonusType);
+        return featureCounts[idx - 1];
     }
 
     public void Reset()
     {
-        Array.Clear(winPayTable, 0, winPayTable.Length);
-        feature.Clear();
+        baseWinStats.Clear();
+        foreach (var featureCount in featureCounts)
+        {
+            featureCount.Clear();
+        }
+        baseWinAmount = 0;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void AddWin(byte symbol, int hits, int amount)
+    public void AddBaseWinCount(byte symbol, int hits)
     {
-        winPayTable[symbol, hits]++;
+        baseWinStats.Update(symbol, hits, 1, (a, b) => a + b);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void AddBaseWinAmount(long amount)
+    {
+        baseWinAmount += amount;
     }
 }
 

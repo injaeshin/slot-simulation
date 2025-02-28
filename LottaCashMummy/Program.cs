@@ -46,7 +46,6 @@ public class Application
     //private const int TOTAL_ITERATIONS = 1_500_000;
     //private static readonly int THREAD_COUNT = 1;
 
-
     public Application(IConfiguration conf)
     {
         this.configuration = conf;
