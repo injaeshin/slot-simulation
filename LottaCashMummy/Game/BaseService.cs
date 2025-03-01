@@ -15,20 +15,17 @@ public class BaseService
     private readonly BaseCreateGem baseTrigger;
     private readonly FeatureService featureService;
 
-    private readonly ThreadLocal<ThreadLocalStorage> buffer;
-
     FeatureBonusTrigger featureTrigger = new FeatureBonusTrigger(FeatureBonusType.None, 0, 0);
 
     public BaseService(IBaseData baseData, IFeatureData featureData, IJackpotData jackpotData)
     {
         this.baseData = baseData;
         this.jackpotData = jackpotData;
-        buffer = new ThreadLocal<ThreadLocalStorage>(() => new ThreadLocalStorage());
 
         baseSpin = new BaseSpin(baseData);
         basePayout = new BasePayout(baseData.PayTable);
         baseTrigger = new BaseCreateGem(baseData, jackpotData);
-        featureService = new FeatureService(featureData, jackpotData);
+        featureService = new FeatureService(featureData);
     }
 
     public void SimulateSingleSpin(ThreadLocalStorage buffer)

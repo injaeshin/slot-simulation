@@ -1,10 +1,12 @@
 ﻿using LottaCashMummy.Common;
+using LottaCashMummy.Database;
 using System.Runtime.CompilerServices;
 
 namespace LottaCashMummy.Buffer;
 
 public class BaseStorage
 {
+    private readonly IDbRepository baseRepository;
     private static readonly byte[,] symbolIndexLookup;
     private readonly SpinStatistics spinStats;
 
@@ -36,9 +38,10 @@ public class BaseStorage
         }
     }
 
-    public BaseStorage(SpinStatistics spinStats)
+    public BaseStorage(SpinStatistics spinStats, IDbRepository baseRepository)
     {
         this.spinStats = spinStats;
+        this.baseRepository = baseRepository;
 
         symbols = new byte[SlotConst.TOTAL_POSITIONS];
         normalIndices = new byte[SlotConst.TOTAL_POSITIONS];
@@ -182,8 +185,9 @@ public class BaseStorage
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddWinAmount(byte symbol, int hits, int amount)
     {
-        spinStats.AddBaseWinCount(symbol, hits);
-        spinStats.AddBaseWinAmount(amount);
+        baseRepository.AddPayWin(symbol, hits, amount);
+        //spinStats.AddBaseWinCount(symbol, hits);
+        //spinStats.AddBaseWinAmount(amount);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

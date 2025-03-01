@@ -1,11 +1,12 @@
 ﻿using System.Runtime.CompilerServices;
 using LottaCashMummy.Common;
+using LottaCashMummy.Database;
 
 namespace LottaCashMummy.Buffer;
 
 public class ThreadLocalStorage
 {
-    private int SEED = 0xABCDEF;
+    private const int SEED = 0xABCDEF;
 
     private readonly Random random;
     public Random Random => random;
@@ -20,11 +21,11 @@ public class ThreadLocalStorage
     private readonly SpinStatistics spinStats;
     public SpinStatistics SpinStats => spinStats;
 
-    public ThreadLocalStorage()
+    public ThreadLocalStorage(IDbRepository baseRepository)
     {
         random = new Random(SEED);
         spinStats = new SpinStatistics();
-        baseStorage = new BaseStorage(spinStats);
+        baseStorage = new BaseStorage(spinStats, baseRepository);
         featureStorage = new FeatureStorage(spinStats);
     }
 

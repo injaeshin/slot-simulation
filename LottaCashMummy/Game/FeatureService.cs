@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using LottaCashMummy.Buffer;
 using LottaCashMummy.Common;
+using LottaCashMummy.Database;
 using Microsoft.VisualBasic;
 
 namespace LottaCashMummy.Game;
@@ -10,8 +11,7 @@ public class FeatureService
     private readonly FeatureSetup setup;
     private readonly FeatureSymbol symbol;
     private readonly FeatureSymbolCollect symbolCollect;
-
-    public FeatureService(IFeatureData featureData, IJackpotData jackpotData)
+    public FeatureService(IFeatureData featureData)
     {
         symbol = new FeatureSymbol(featureData);
 

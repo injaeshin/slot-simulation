@@ -1,6 +1,10 @@
 ﻿using LottaCashMummy.Buffer;
 using LottaCashMummy.Common;
+using LottaCashMummy.Database;
 using LottaCashMummy.Game;
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace LottaCashMummy;
 
@@ -14,23 +18,26 @@ public class LottaCashMummy
 
     private readonly ThreadLocal<ThreadLocalStorage> tls;
 
+    private readonly IDbRepository baseRepository;
+
     private long progress;
 
-    public LottaCashMummy(IBaseData baseData, IFeatureData featureData, IJackpotData jackpotData)
+    public LottaCashMummy(IBaseData baseData, IFeatureData featureData, IJackpotData jackpotData, IDbRepository baseRepository)
     {
         this.baseData = baseData;
         this.featureData = featureData;
         this.jackpotData = jackpotData;
+        this.baseRepository = baseRepository;
 
         baseService = new BaseService(baseData, featureData, jackpotData);
-        tls = new ThreadLocal<ThreadLocalStorage>(() => new ThreadLocalStorage());
+        tls = new ThreadLocal<ThreadLocalStorage>(() => new ThreadLocalStorage(baseRepository));
     }
 
     public ref long Progress => ref progress;  // 진행 상황을 외부에서 참조할 수 있도록
 
     public void Run(long totalSpins, int threadCount = 0)
     {
-        const int BATCH_SIZE = 20000;
+        const int BATCH_SIZE = 30000;
 
         var config = new SimulationStats();
         var totalBatches = (int)Math.Ceiling(totalSpins / (double)BATCH_SIZE);
@@ -51,12 +58,6 @@ public class LottaCashMummy
             Interlocked.Add(ref progress, currentBatchSpins);
             config.MergeFromBuffer(buffer);
         });
-
-        //PrintPayWinResult(totalSpins, config);
-        PrintFeatureEnterStats(config);
-        //CalculateAndPrintGemProbabilities(config);
-
-        //PrintFeatureTestStats(config);
     }
 
     private static long CalculateBatchSpins(long totalSpins, int batchIndex, int batchSize)
@@ -64,7 +65,7 @@ public class LottaCashMummy
         return Math.Min(batchSize, totalSpins - batchIndex * (long)batchSize);
     }
 
-    private static void PrintPayWinResult(long totalSpins, SimulationStats state)
+    public void PrintPayWinResult(long totalSpins)
     {
         Console.WriteLine();
         Console.WriteLine("Base Game Symbol Win Results:");
@@ -86,8 +87,8 @@ public class LottaCashMummy
         {
             foreach (var symbolType in symbolOrder)
             {
-                int symbol = (int)symbolType;
-                var count = state.BaseWinPayStats.Get(symbol, hits);
+                byte symbol = (byte)symbolType;
+                var count = baseRepository.GetTotalPayWinAmount(symbol, hits);
                 var probability = (count / (double)totalSpins) * 100; // 확률 계산
                 Console.WriteLine($"{symbolType} {hits,-8} {count,10:N0} {probability,10:F4}%");
                 totalCount += count; // 카운트 업데이트
@@ -101,80 +102,80 @@ public class LottaCashMummy
 
     private static void PrintFeatureEnterStats(SimulationStats state)
     {
-        Console.WriteLine("\nFeature Enter Statistics:");
-        Console.WriteLine(new string('-', 150));
+        // Console.WriteLine("\nFeature Enter Statistics:");
+        // Console.WriteLine(new string('-', 150));
 
-        var header = String.Format(
-            "{0,-20} {1,10} {2,10} {3,15} {4,15} {5,15} {6,15} {7,15} {8,15} {9,15} {10,15} {11, 15} {12, 15} {13, 15}",
-            "Type", "Gems", "Level", "EnterCnt", "SpinCnt", "RedCoinCnt", "RespinCnt", "PlusSpinCnt", 
-            "GemCnt", "GemValue", "CoinCntWRedCoin", "CoinCntNoRedCoin", "CoinValueWRedCoin", "CoinValueNoRedCoin");
+        // var header = String.Format(
+        //     "{0,-20} {1,10} {2,10} {3,15} {4,15} {5,15} {6,15} {7,15} {8,15} {9,15} {10,15} {11, 15} {12, 15} {13, 15}",
+        //     "Type", "Gems", "Level", "EnterCnt", "SpinCnt", "RedCoinCnt", "RespinCnt", "PlusSpinCnt", 
+        //     "GemCnt", "GemValue", "CoinCntWRedCoin", "CoinCntNoRedCoin", "CoinValueWRedCoin", "CoinValueNoRedCoin");
 
-        Console.WriteLine(header);
-        Console.WriteLine(new string('-', 150));
+        // Console.WriteLine(header);
+        // Console.WriteLine(new string('-', 150));
 
-        // 배열 기반 접근으로 변경
-        double totalEnterCount = 0;
-        foreach (var featureStat in state.FeatureStats)
-        {
-            // 모든 레벨과 젬 수에 대해 스핀 카운트 합산
-            for (int level = 1; level <= 4; level++)
-            {
-                for (int gem = 1; gem <= 5; gem++)
-                {
-                    int index = ArraySlotStats.GetIndex(level, gem);
-                    totalEnterCount += featureStat.SpinCounts[index];
-                }
-            }
-        }
+        // // 배열 기반 접근으로 변경
+        // double totalEnterCount = 0;
+        // foreach (var featureStat in state.FeatureStats)
+        // {
+        //     // 모든 레벨과 젬 수에 대해 스핀 카운트 합산
+        //     for (int level = 1; level <= 4; level++)
+        //     {
+        //         for (int gem = 1; gem <= 5; gem++)
+        //         {
+        //             int index = ArraySlotStats.GetIndex(level, gem);
+        //             totalEnterCount += featureStat.SpinCounts[index];
+        //         }
+        //     }
+        // }
 
-        foreach (FeatureBonusType type in BonusTypeConverter.CombiTypeOrder.Keys)
-        {
-            var featureStats = state.GetFeatureStats(type);
-            for (int gem = 1; gem <= 5; gem++)
-            {
-                for (byte level = 1; level <= 4; level++)
-                {
-                    int index = ArraySlotStats.GetIndex(level, gem);
+        // foreach (FeatureBonusType type in BonusTypeConverter.CombiTypeOrder.Keys)
+        // {
+        //     var featureStats = state.GetFeatureStats(type);
+        //     for (int gem = 1; gem <= 5; gem++)
+        //     {
+        //         for (byte level = 1; level <= 4; level++)
+        //         {
+        //             int index = ArraySlotStats.GetIndex(level, gem);
                     
-                    // 배열에서 직접 값 가져오기
-                    var spinCount = featureStats.SpinCounts[index];
-                    var levelUpCount = featureStats.LevelUpCounts[index];
-                    var redCoinCount = featureStats.RedCoinCount[index];
-                    var respinCount = featureStats.RespinCounts[index];
-                    var plusSpinCount = featureStats.FreeSpinCoinCount[index];
-                    var createGemCount = featureStats.CreateGemCount[index];
-                    var gemAmount = featureStats.ObtainGemValue[index];
-                    var createCoinCountA = featureStats.CreateCoinCountA[index];
-                    var createCoinCountB = featureStats.CreateCoinCountB[index];
-                    var coinAmountA = featureStats.ObtainCoinValueA[index];
-                    var coinAmountB = featureStats.ObtainCoinValueB[index];
+        //             // 배열에서 직접 값 가져오기
+        //             var spinCount = featureStats.SpinCounts[index];
+        //             var levelUpCount = featureStats.LevelUpCounts[index];
+        //             var redCoinCount = featureStats.RedCoinCount[index];
+        //             var respinCount = featureStats.RespinCounts[index];
+        //             var plusSpinCount = featureStats.FreeSpinCoinCount[index];
+        //             var createGemCount = featureStats.CreateGemCount[index];
+        //             var gemAmount = featureStats.ObtainGemValue[index];
+        //             var createCoinCountA = featureStats.CreateCoinCountA[index];
+        //             var createCoinCountB = featureStats.CreateCoinCountB[index];
+        //             var coinAmountA = featureStats.ObtainCoinValueA[index];
+        //             var coinAmountB = featureStats.ObtainCoinValueB[index];
 
-                    // 값이 0인 경우 출력하지 않음 - 주석 처리하여 모든 데이터 출력
-                    // if (spinCount == 0) continue;
+        //             // 값이 0인 경우 출력하지 않음 - 주석 처리하여 모든 데이터 출력
+        //             // if (spinCount == 0) continue;
 
-                    var enterProbability = (spinCount / totalEnterCount) * 100;
+        //             var enterProbability = (spinCount / totalEnterCount) * 100;
 
-                    var line = String.Format(
-                        "{0,-20} {1,10} {2,10} {3,15:N0} {4,15:N0} {5,15:N0} {6,15:N0} {7,15:N0} {8,15:N0} {9,15:N2} {10,15:N0} {11,15:N0} {12,15:N2} {13,15:N2}",
-                        type, gem, level, levelUpCount, spinCount, redCoinCount, respinCount, plusSpinCount,
-                        createGemCount, gemAmount, createCoinCountA, createCoinCountB, coinAmountA, coinAmountB);
+        //             var line = String.Format(
+        //                 "{0,-20} {1,10} {2,10} {3,15:N0} {4,15:N0} {5,15:N0} {6,15:N0} {7,15:N0} {8,15:N0} {9,15:N2} {10,15:N0} {11,15:N0} {12,15:N2} {13,15:N2}",
+        //                 type, gem, level, levelUpCount, spinCount, redCoinCount, respinCount, plusSpinCount,
+        //                 createGemCount, gemAmount, createCoinCountA, createCoinCountB, coinAmountA, coinAmountB);
 
-                    Console.WriteLine(line);
-                }
-            }
-            Console.WriteLine(header);
-        }
+        //             Console.WriteLine(line);
+        //         }
+        //     }
+        //     Console.WriteLine(header);
+        // }
 
-        Console.WriteLine(new string('-', 150));
-        Console.WriteLine(header);
-        Console.WriteLine(new string('-', 150));
+        // Console.WriteLine(new string('-', 150));
+        // Console.WriteLine(header);
+        // Console.WriteLine(new string('-', 150));
 
-        // win amount output.
-        var baseWinAmount = state.BaseWinAmount;
-        var featureWinAmount = state.FeatureWinAmount;
+        // // win amount output.
+        // var baseWinAmount = state.BaseWinAmount;
+        // var featureWinAmount = state.FeatureWinAmount;
 
-        Console.WriteLine($"BaseWinAmount: {baseWinAmount,15:N0}");
-        Console.WriteLine($"FeatureWinAmount: {featureWinAmount,15:N0}");
+        // Console.WriteLine($"BaseWinAmount: {baseWinAmount,15:N0}");
+        // Console.WriteLine($"FeatureWinAmount: {featureWinAmount,15:N0}");
     }
 }
 

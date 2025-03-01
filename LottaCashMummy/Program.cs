@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
-using System.Threading;
+
 using LottaCashMummy.Common;
-using System;
+using LottaCashMummy.Database;
 
 namespace LottaCashMummy;
 
@@ -22,14 +22,36 @@ class Program
     {
         var configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            //.SetBasePath(Environment.CurrentDirectory)
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            //.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
             .Build();
 
-        var serviceProvider = new ServiceCollection() { }
-            .AddSingleton<IConfiguration>(configuration)
-            .AddTransient<Application>()
-            .BuildServiceProvider();
+        var dbSettings = new DatabaseSettings();
+        configuration.GetSection("DatabaseSettings").Bind(dbSettings);
+
+        var services = new ServiceCollection();
+        services.AddSingleton(dbSettings);
+        services.AddSingleton<IConfiguration>(configuration);
+        
+        // 연결 풀 등록
+        services.AddSingleton<DbConnectionPool>(provider => 
+            new DbConnectionPool(
+                provider.GetRequiredService<DatabaseSettings>().UseInMemoryDatabase 
+                    ? DbConnectionPool.CreateSharedMemoryConnectionString() 
+                    : $"Data Source={provider.GetRequiredService<DatabaseSettings>().DatabasePath}",
+                provider.GetRequiredService<DatabaseSettings>().ConnectionPoolSize,
+                provider.GetRequiredService<DatabaseSettings>().AutoCreateTables
+            )
+        );
+        
+        // 리포지토리 등록
+        services.AddSingleton<IDbRepository>(provider => 
+            new DbRepository(provider.GetRequiredService<DbConnectionPool>())
+        );
+        
+        services.AddTransient<Application>();
+
+        var serviceProvider = services.BuildServiceProvider();
 
         return serviceProvider;
     }
@@ -38,6 +60,7 @@ class Program
 public class Application
 {
     private readonly IConfiguration configuration;
+    private readonly IDbRepository baseRepository;
 
     //private const int TOTAL_ITERATIONS = 1_000_000_000;
     private const int TOTAL_ITERATIONS = 312_500_000;
@@ -46,9 +69,10 @@ public class Application
     //private const int TOTAL_ITERATIONS = 1_500_000;
     //private static readonly int THREAD_COUNT = 1;
 
-    public Application(IConfiguration conf)
+    public Application(IConfiguration conf, IDbRepository baseRepo)
     {
         this.configuration = conf;
+        this.baseRepository = baseRepo;
     }
 
     public async Task RunAsync()
@@ -74,7 +98,8 @@ public class Application
         Console.WriteLine($"Total spins: {TOTAL_ITERATIONS:N0}");
         Console.WriteLine("Progress: ");
 
-        var game = new LottaCashMummy(baseData, featureData, jackpotData);
+        // 이미 DI를 통해 주입된 리포지토리 사용
+        var game = new LottaCashMummy(baseData, featureData, jackpotData, baseRepository);
 
         // 진행상황 출력을 위한 타이머
         var progressTimer = new Timer(_ =>
@@ -100,6 +125,16 @@ public class Application
         progressTimer.Dispose();
 
         sw.Stop();
+
+        game.PrintPayWinResult(TOTAL_ITERATIONS);
+        //PrintFeatureEnterStats(config);
+        //CalculateAndPrintGemProbabilities(config);
+
+        //PrintFeatureTestStats(config);
+
+
+
+
         var totalSeconds = sw.ElapsedMilliseconds / 1000.0;
         var avgSpinsPerSec = TOTAL_ITERATIONS / totalSeconds;
 

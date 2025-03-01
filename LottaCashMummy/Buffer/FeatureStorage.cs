@@ -140,13 +140,13 @@ public class FeatureStorage
         {
             case FeatureSymbolType.Coin:
                 AddCoinSymbol(idx, bonusType, value);
-                spinStats.GetFeatureStats(FeatureBonusType).IncrementCreateCoinCount(FeatureBonusType, mummy.Level, initGemCount);
+                //spinStats.GetFeatureStats(FeatureBonusType).IncrementCreateCoinCount(FeatureBonusType, mummy.Level, initGemCount);
                 break;
             case FeatureSymbolType.Gem:
                 AddGemSymbol(idx, bonusType, value, isCreate);
                 if (isCreate)
                 {
-                    spinStats.GetFeatureStats(FeatureBonusType).IncrementCreateGemCount(mummy.Level, initGemCount);
+                    //spinStats.GetFeatureStats(FeatureBonusType).IncrementCreateGemCount(mummy.Level, initGemCount);
                 }
                 break;
             default:
@@ -177,7 +177,7 @@ public class FeatureStorage
         }
 
         remainSpinCount--;
-        spinStats.GetFeatureStats(FeatureBonusType).IncrementSpinCount(mummy.Level, initGemCount);
+        //spinStats.GetFeatureStats(FeatureBonusType).IncrementSpinCount(mummy.Level, initGemCount);
 
         return true;
     }
@@ -186,7 +186,7 @@ public class FeatureStorage
     {
         remainSpinCount = SlotConst.FEATURE_SPIN_COUNT;
 
-        spinStats.GetFeatureStats(FeatureBonusType).IncrementLevelUpCount(mummy.Level, initGemCount);
+        //spinStats.GetFeatureStats(FeatureBonusType).IncrementLevelUpCount(mummy.Level, initGemCount);
     }
 
     //public void AddWinAmount(double amount) => TotalWinAmount += amount;
@@ -203,7 +203,7 @@ public class FeatureStorage
             throw new Exception("Level Up failed");
         }
 
-        spinStats.GetFeatureStats(FeatureBonusType).IncrementLevelUpCount(mummy.Level, initGemCount);
+        //spinStats.GetFeatureStats(FeatureBonusType).IncrementLevelUpCount(mummy.Level, initGemCount);
 
         return true;
     }
@@ -215,19 +215,19 @@ public class FeatureStorage
         {
             case FeatureBonusValueType.RedCoin:
                 hasRedCoin = true;
-                spinStats.GetFeatureStats(FeatureBonusType).IncrementRedCoinCount(mummy.Level, initGemCount);
+                //spinStats.GetFeatureStats(FeatureBonusType).IncrementRedCoinCount(mummy.Level, initGemCount);
                 break;
             case FeatureBonusValueType.Spin:
                 AddBonusSpinCount(1);
-                spinStats.GetFeatureStats(FeatureBonusType).IncrementFreeSpinCoinCount(mummy.Level, initGemCount);
+                //spinStats.GetFeatureStats(FeatureBonusType).IncrementFreeSpinCoinCount(mummy.Level, initGemCount);
                 break;
             default: // Coin or Jackpot
                 //AddWinAmount(symbol.Value);
                 spinStats.AddFeatureWinAmount(symbol.Value);
-                if (symbol.Type == FeatureSymbolType.Gem)
-                    spinStats.GetFeatureStats(FeatureBonusType).IncrementObtainGemValue(mummy.Level, initGemCount, symbol.Value);
-                else
-                    spinStats.GetFeatureStats(FeatureBonusType).IncrementObtainCoinValue(FeatureBonusType, mummy.Level, initGemCount, symbol.Value);
+                //if (symbol.Type == FeatureSymbolType.Gem)
+                    //spinStats.GetFeatureStats(FeatureBonusType).IncrementObtainGemValue(mummy.Level, initGemCount, symbol.Value);
+                //else
+                    //spinStats.GetFeatureStats(FeatureBonusType).IncrementObtainCoinValue(FeatureBonusType, mummy.Level, initGemCount, symbol.Value);
                 break;
         }
 
@@ -251,6 +251,6 @@ public class FeatureStorage
 
     public void AddRespinCount()
     {
-        spinStats.GetFeatureStats(FeatureBonusType).IncrementRespinCount(mummy.Level, initGemCount);
+        //spinStats.GetFeatureStats(FeatureBonusType).IncrementRespinCount(mummy.Level, initGemCount);
     }
 }
