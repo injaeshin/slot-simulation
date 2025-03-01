@@ -5,8 +5,6 @@ namespace LottaCashMummy.Buffer;
 
 public class BaseStorage
 {
-    private const int BET = SlotConst.BET;
-
     private static readonly byte[,] symbolIndexLookup;
     private readonly SpinStatistics spinStats;
 
@@ -185,7 +183,7 @@ public class BaseStorage
     public void AddWinAmount(byte symbol, int hits, int amount)
     {
         spinStats.AddBaseWinCount(symbol, hits);
-        spinStats.AddBaseWinAmount(BET * amount);
+        spinStats.AddBaseWinAmount(amount);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

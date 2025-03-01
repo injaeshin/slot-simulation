@@ -16,18 +16,16 @@ public class ThreadLocalStorage
     private readonly FeatureStorage featureStorage;
     public FeatureStorage FeatureStorage => featureStorage;
 
-    public int BaseWinAmount { get; private set; }
-    public int FeatureWinAmount { get; private set; }
 
-    public SpinStatistics SpinStats { get; private set; }
+    private readonly SpinStatistics spinStats;
+    public SpinStatistics SpinStats => spinStats;
 
     public ThreadLocalStorage()
     {
-        SpinStats = new SpinStatistics();
-
         random = new Random(SEED);
-        baseStorage = new BaseStorage(SpinStats);
-        featureStorage = new FeatureStorage(SpinStats);
+        spinStats = new SpinStatistics();
+        baseStorage = new BaseStorage(spinStats);
+        featureStorage = new FeatureStorage(spinStats);
     }
 
     public void Clear()
@@ -37,9 +35,9 @@ public class ThreadLocalStorage
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void AddBaseWinAmount(int amount) => BaseWinAmount += amount;
+    public double GetBaseWinAmount() => SpinStats.GetBaseWinAmount();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void AddFeatureWinAmount(int amount) => FeatureWinAmount += amount;
+    public double GetFeatureWinAmount() => SpinStats.GetFeatureWinAmount();
 }
 

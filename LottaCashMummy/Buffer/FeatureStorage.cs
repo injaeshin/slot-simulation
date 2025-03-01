@@ -5,7 +5,6 @@ namespace LottaCashMummy.Buffer;
 
 public class FeatureStorage
 {
-    private const int Bet = SlotConst.BET;
     private readonly SpinStatistics spinStats;
 
     private readonly MummyState mummy;
@@ -35,7 +34,6 @@ public class FeatureStorage
     public int GemCount { get; private set; }
     public int CoinCount { get; private set; }
     public int MummyAreaCount { get; private set; }
-    public int TotalWinAmount { get; private set; }
 
     public FeatureStorage(SpinStatistics spinStats)
     {
@@ -65,9 +63,6 @@ public class FeatureStorage
         remainSpinCount = 0;
         MummyAreaCount = 0;
         featureBonusType = FeatureBonusType.None;
-
-        TotalWinAmount = 0;
-
     }
 
     public void ClearSymbolInScreenArea()
@@ -194,7 +189,7 @@ public class FeatureStorage
         spinStats.GetFeatureStats(FeatureBonusType).IncrementLevelUpCount(mummy.Level, initGemCount);
     }
 
-    public void AddWinAmount(double amount) => TotalWinAmount += (int)(amount);
+    //public void AddWinAmount(double amount) => TotalWinAmount += amount;
 
     public void InitMummy(int centerIndex, int area, int level, int reqGem)
     {
@@ -208,8 +203,7 @@ public class FeatureStorage
             throw new Exception("Level Up failed");
         }
 
-        var fromLevel = mummy.Level - 1;
-        spinStats.GetFeatureStats(FeatureBonusType).IncrementLevelUpCount(fromLevel, initGemCount);
+        spinStats.GetFeatureStats(FeatureBonusType).IncrementLevelUpCount(mummy.Level, initGemCount);
 
         return true;
     }
@@ -228,7 +222,8 @@ public class FeatureStorage
                 spinStats.GetFeatureStats(FeatureBonusType).IncrementFreeSpinCoinCount(mummy.Level, initGemCount);
                 break;
             default: // Coin or Jackpot
-                AddWinAmount(symbol.Value);
+                //AddWinAmount(symbol.Value);
+                spinStats.AddFeatureWinAmount(symbol.Value);
                 if (symbol.Type == FeatureSymbolType.Gem)
                     spinStats.GetFeatureStats(FeatureBonusType).IncrementObtainGemValue(mummy.Level, initGemCount, symbol.Value);
                 else

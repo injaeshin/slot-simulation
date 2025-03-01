@@ -20,12 +20,10 @@ public class FeatureService
         symbolCollect = new FeatureSymbolCollect(mummy);
     }
 
-    public int Execute(ThreadLocalStorage tls)
+    public void Execute(ThreadLocalStorage tls)
     {
         Init(tls.BaseStorage, tls.FeatureStorage, tls.Random);
         Spin(tls.FeatureStorage, tls.Random);
-
-        return tls.FeatureStorage.TotalWinAmount;
     }
 
     private void Init(BaseStorage bs, FeatureStorage fs, Random random)

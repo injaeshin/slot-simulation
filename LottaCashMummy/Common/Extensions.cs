@@ -46,4 +46,21 @@ public static class Extensions
         
         return symbolValue;
     }
+    // public static void AddOrUpdate<TKey, TValue>(
+    //     this Dictionary<TKey, TValue> dictionary,
+    //     TKey key,
+    //     TValue value,
+    //     Func<TKey, TValue, TValue> updateValueFactory) where TKey : notnull
+    // {
+    //     if (dictionary.ContainsKey(key))
+    //     {
+    //         // 키가 존재하면 업데이트
+    //         dictionary[key] = updateValueFactory(key, dictionary[key]);
+    //     }
+    //     else
+    //     {
+    //         // 키가 존재하지 않으면 추가
+    //         dictionary.Add(key, value);
+    //     }
+    // }
 }
