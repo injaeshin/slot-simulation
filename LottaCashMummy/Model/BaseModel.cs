@@ -5,8 +5,15 @@ using SQLite;
 
 namespace LottaCashMummy.Model;
 
-[Table("base_game")]
-public class BaseGameModel
+[Table("base_spin")]
+public class BaseSpinModel
+{
+    [PrimaryKey]
+    public int SpinCount { get; set; }
+}
+
+[Table("base_payout")]
+public class BasePayoutModel
 {
     [PrimaryKey, AutoIncrement]
     //[ColumnMapping("id")]

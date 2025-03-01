@@ -25,6 +25,11 @@ public class FeatureSymbol
 
         var includeRedCoin = isRespin == false;
         var bonusCombiType = BonusTypeConverter.Convert(fs.FeatureBonusType, includeRedCoin);
+         
+        if (isRespin && includeRedCoin)
+        {
+            throw new Exception("");
+        }
 
         // 머미 영역만 루프
         for (int i = 0; i < mummyCount; i++)
@@ -45,11 +50,20 @@ public class FeatureSymbol
 
             var firstSymbolValue = featureData.FeatureSymbol.GetRollSymbolValues(level, bonusCombiType, random);
             fs.AddSymbol(idx, featureSymbolType, firstSymbolValue.BonusType, firstSymbolValue.Value);
+            if (isRespin && firstSymbolValue.BonusType == FeatureBonusValueType.RedCoin)
+            {
+                throw new Exception("Red coin is not allowed to be respin");
+            }
 
             if (targetSymbolIdx == idx)
             {
                 var secondSymbolValue = featureData.FeatureSymbol.GetRollSymbolValues(level, bonusCombiType, random);
                 fs.AddSymbol(idx, featureSymbolType, secondSymbolValue.BonusType, secondSymbolValue.Value);
+
+                if (isRespin && secondSymbolValue.BonusType == FeatureBonusValueType.RedCoin)
+                {
+                    throw new Exception("Red coin is not allowed to be respin");
+                }
             }
         }
     }

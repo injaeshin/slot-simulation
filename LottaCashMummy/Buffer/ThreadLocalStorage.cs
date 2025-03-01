@@ -32,13 +32,14 @@ public class ThreadLocalStorage
     public void Clear()
     {
         baseStorage.Clear();
-        FeatureStorage.Clear();
+        featureStorage.Clear();
+        spinStats.Clear();
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public double GetBaseWinAmount() => SpinStats.GetBaseWinAmount();
+    // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    // public double GetBaseWinAmount() => SpinStats.GetBaseWinAmount();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public double GetFeatureWinAmount() => SpinStats.GetFeatureWinAmount();
+    // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    // public double GetFeatureWinAmount() => SpinStats.GetFeatureWinAmount();
 }
 

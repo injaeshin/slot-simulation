@@ -28,7 +28,7 @@ public class MummyState
         GemsToLevel = 0;
     }
 
-    public void CollectGem()
+    public void ObtainGem()
     {
         GemCount++;
     }

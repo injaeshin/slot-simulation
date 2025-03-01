@@ -10,9 +10,14 @@ public interface IDatabaseConnection : IDisposable
     T QuerySingle<T>(string sql, object? param = null);
     IEnumerable<T> Query<T>(string sql, object? param = null);
     int Execute(string sql, object? param = null);
+    int Execute(string sql, object? param = null, IDbTransaction? transaction = null);
+
     Task<T> QuerySingleAsync<T>(string sql, object? param = null);
     Task<IEnumerable<T>> QueryAsync<T>(string sql, object? param = null);
     Task<int> ExecuteAsync(string sql, object? param = null);
+
+    IDbTransaction BeginTransaction();
+    void Open();
 }
 
 public class DbConnection : IDatabaseConnection, IDisposable
@@ -25,6 +30,8 @@ public class DbConnection : IDatabaseConnection, IDisposable
     }
 
     public IDbConnection Connection => connection;
+
+    public void Open() => connection.Open();
 
     public void Dispose() => connection.Dispose();
 
@@ -43,6 +50,11 @@ public class DbConnection : IDatabaseConnection, IDisposable
         return Connection.Execute(sql, param);
     }
 
+    public int Execute(string sql, object? param = null, IDbTransaction? transaction = null)
+    {
+        return Connection.Execute(sql, param, transaction);
+    }
+
     public async Task<T> QuerySingleAsync<T>(string sql, object? param = null)
     {
         return await Connection.QuerySingleAsync<T>(sql, param);
@@ -56,5 +68,10 @@ public class DbConnection : IDatabaseConnection, IDisposable
     public async Task<int> ExecuteAsync(string sql, object? param = null)
     {
         return await Connection.ExecuteAsync(sql, param);
-    }    
+    }
+
+    public IDbTransaction BeginTransaction()
+    {
+        return Connection.BeginTransaction();
+    }
 }

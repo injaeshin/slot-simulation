@@ -1,18 +1,20 @@
 using Dapper.ColumnMapper;
 using LottaCashMummy.Common;
+using SQLite;
 
 namespace LottaCashMummy.Model;
 
+[Table("feature_enter")]
 public class FeatureEnterModel
 {
-    // 보너스 타입
-    // 
+    [PrimaryKey, AutoIncrement]
+    public int Id { get; set; }
 
-    [ColumnMapping("sym_type")]
-    public SymbolType SymbolType { get; set; }
-    [ColumnMapping("hit")]
-    public int Hit { get; set; }
-    [ColumnMapping("value")]
-    public float Value { get; set; }
+    [NotNull]
+    public byte Level { get; set; }
+
+    [NotNull]
+    public int EnterCount { get; set; }
 }
+
 

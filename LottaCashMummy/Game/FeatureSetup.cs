@@ -43,7 +43,7 @@ public class FeatureSetup
                 throw new Exception("Win gem symbol is not set");
             }
 
-            featureStorage.AddSymbol(symbol.Index, FeatureSymbolType.Gem, FeatureBonusValueType.None, symbol.Value, false);
+            featureStorage.CopyGemSymbol(symbol.Index, FeatureSymbolType.Gem, FeatureBonusValueType.None, symbol.Value);
         }
 
         featureStorage.SetInitGemCount(winGemCount);

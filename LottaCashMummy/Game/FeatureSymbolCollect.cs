@@ -12,7 +12,7 @@ public class FeatureSymbolCollect
         this.mummy = mummy;
     }
 
-    public bool CollectCoinInMummyArea(FeatureStorage fs)
+    public bool CollectCoinInMummyArea(FeatureStorage fs, bool isRespin)
     {
         var coinCount = fs.CoinCount;
         if (coinCount <= 0)
@@ -31,13 +31,13 @@ public class FeatureSymbolCollect
 
             if (symbol.First.Type == FeatureSymbolType.Coin)
             {
-                hasRedCoin = fs.CollectSymbolValue(idx, symbol.First);
-                fs.CollectSymbol(idx, symbol.First);
+                hasRedCoin = fs.CollectSymbolValue(idx, symbol.First, isRespin);
+                fs.CollectSymbol(idx, symbol.First, isRespin);
             }
             else if (symbol.Second.Type == FeatureSymbolType.Coin)
             {
-                hasRedCoin = fs.CollectSymbolValue(idx, symbol.Second);
-                fs.CollectSymbol(idx, symbol.Second);
+                hasRedCoin = fs.CollectSymbolValue(idx, symbol.Second, isRespin);
+                fs.CollectSymbol(idx, symbol.Second, isRespin);
             }
         }
 
@@ -67,13 +67,13 @@ public class FeatureSymbolCollect
 
             if (symbol.First.Type == FeatureSymbolType.Gem)
             {
-                fs.CollectSymbolValue(idx, symbol.First);
-                fs.CollectSymbol(idx, symbol.First);
+                fs.CollectSymbolValue(idx, symbol.First, isRespin: false);
+                fs.CollectSymbol(idx, symbol.First, isRespin: false);
             }
             else if (symbol.Second.Type == FeatureSymbolType.Gem)
             {
-                fs.CollectSymbolValue(idx, symbol.First);
-                fs.CollectSymbol(idx, symbol.Second);
+                fs.CollectSymbolValue(idx, symbol.Second, isRespin: false);
+                fs.CollectSymbol(idx, symbol.Second, isRespin: false);
             }
 
             mummy.LevelUp(fs);

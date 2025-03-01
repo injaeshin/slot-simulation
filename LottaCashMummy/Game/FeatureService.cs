@@ -51,7 +51,7 @@ public class FeatureService
             symbol.CreateWithoutMummyArea(fs, random);
 
             // 머미 영역 심볼 획득
-            var hasRedCoin = symbolCollect.CollectCoinInMummyArea(fs);
+            var hasRedCoin = symbolCollect.CollectCoinInMummyArea(fs, isRespin: false);
             if (hasRedCoin)
             {
                 Respin(fs, random);
@@ -111,7 +111,7 @@ public class FeatureService
                 break;
             }
 
-            var hasRedCoin = symbolCollect.CollectCoinInMummyArea(fs);
+            var hasRedCoin = symbolCollect.CollectCoinInMummyArea(fs, isRespin: true);
             if (hasRedCoin)
             {
                 throw new Exception("Red coin found");

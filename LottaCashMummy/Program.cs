@@ -132,9 +132,6 @@ public class Application
 
         //PrintFeatureTestStats(config);
 
-
-
-
         var totalSeconds = sw.ElapsedMilliseconds / 1000.0;
         var avgSpinsPerSec = TOTAL_ITERATIONS / totalSeconds;
 

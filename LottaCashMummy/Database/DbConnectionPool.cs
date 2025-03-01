@@ -1,14 +1,9 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Data;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 
 using LottaCashMummy.Database;
-using LottaCashMummy.Model;
-using LottaCashMummy.Common;
+
 
 public class DbConnectionPool : IDisposable
 {
@@ -49,12 +44,16 @@ public class DbConnectionPool : IDisposable
             // 기본 테이블 생성
             using var cmd = keepAliveConnection.CreateCommand();
             cmd.CommandText = @"
-                CREATE TABLE IF NOT EXISTS base_game (
-                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    SymbolType INTEGER NOT NULL,
-                    Hit INTEGER NOT NULL,
-                    Amount INTEGER NOT NULL
-                )
+                CREATE TABLE IF NOT EXISTS base_spin (
+                    spin_count INTEGER PRIMARY KEY AUTOINCREMENT
+                );
+
+                CREATE TABLE IF NOT EXISTS base_payout (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    symbol_type INTEGER NOT NULL,
+                    hit INTEGER NOT NULL,
+                    amount INTEGER NOT NULL
+                );
             ";
             cmd.ExecuteNonQuery();
         }
@@ -71,6 +70,11 @@ public class DbConnectionPool : IDisposable
     {
         if (availableConnections.TryTake(out var connection))
         {
+            if (connection.Connection.State != ConnectionState.Open)
+            {
+                connection.Open();
+            }
+
             return new PooledConnection(connection, this);
         }
         
@@ -123,9 +127,12 @@ public class DbConnectionPool : IDisposable
         public IDbConnection Connection => _innerConnection.Connection;
         
         // 모든 메서드는 내부 연결에 위임
+        public void Open() => _innerConnection.Open();
         public T QuerySingle<T>(string sql, object? param = null) => _innerConnection.QuerySingle<T>(sql, param);
         public IEnumerable<T> Query<T>(string sql, object? param = null) => _innerConnection.Query<T>(sql, param);
         public int Execute(string sql, object? param = null) => _innerConnection.Execute(sql, param);
+        public int Execute(string sql, object? param = null, IDbTransaction? transaction = null) => _innerConnection.Execute(sql, param, transaction);
+        public IDbTransaction BeginTransaction() => _innerConnection.BeginTransaction();
         public async Task<T> QuerySingleAsync<T>(string sql, object? param = null) => await _innerConnection.QuerySingleAsync<T>(sql, param);
         public async Task<IEnumerable<T>> QueryAsync<T>(string sql, object? param = null) => await _innerConnection.QueryAsync<T>(sql, param);
         public async Task<int> ExecuteAsync(string sql, object? param = null) => await _innerConnection.ExecuteAsync(sql, param);

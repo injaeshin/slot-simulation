@@ -52,7 +52,11 @@ public class LottaCashMummy
 
             for (long i = 0; i < currentBatchSpins; i++)
             {
+                buffer.Clear();
                 baseService.SimulateSingleSpin(buffer);
+                
+                // TODO: 데이터베이스에 저장
+                //baseRepository.SaveSpinResult(buffer);
             }
 
             Interlocked.Add(ref progress, currentBatchSpins);

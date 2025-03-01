@@ -183,11 +183,15 @@ public class BaseStorage
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void AddSpinCount()
+    {
+        spinStats.AddBaseSpinCount();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddWinAmount(byte symbol, int hits, int amount)
     {
-        baseRepository.AddPayWin(symbol, hits, amount);
-        //spinStats.AddBaseWinCount(symbol, hits);
-        //spinStats.AddBaseWinAmount(amount);
+        spinStats.AddBasePayWin(symbol, hits, amount);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
