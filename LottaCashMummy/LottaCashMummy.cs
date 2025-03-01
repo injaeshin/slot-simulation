@@ -18,28 +18,28 @@ public class LottaCashMummy
 
     private readonly ThreadLocal<ThreadLocalStorage> tls;
 
-    private readonly IDbRepository baseRepository;
+    private readonly IDbRepository dbRepository;
 
     private long progress;
 
-    public LottaCashMummy(IBaseData baseData, IFeatureData featureData, IJackpotData jackpotData, IDbRepository baseRepository)
+    public LottaCashMummy(IBaseData baseData, IFeatureData featureData, IJackpotData jackpotData, IDbRepository dbRepository)
     {
         this.baseData = baseData;
         this.featureData = featureData;
         this.jackpotData = jackpotData;
-        this.baseRepository = baseRepository;
+        this.dbRepository = dbRepository;
 
         baseService = new BaseService(baseData, featureData, jackpotData);
-        tls = new ThreadLocal<ThreadLocalStorage>(() => new ThreadLocalStorage(baseRepository));
+        tls = new ThreadLocal<ThreadLocalStorage>(() => new ThreadLocalStorage(dbRepository));
     }
 
     public ref long Progress => ref progress;  // 진행 상황을 외부에서 참조할 수 있도록
 
     public void Run(long totalSpins, int threadCount = 0)
     {
-        const int BATCH_SIZE = 30000;
+        const int BATCH_SIZE = 120000;
 
-        var config = new SimulationStats();
+        //var config = new SimulationStats();
         var totalBatches = (int)Math.Ceiling(totalSpins / (double)BATCH_SIZE);
         if (threadCount <= 0) threadCount = Environment.ProcessorCount;
 
@@ -50,17 +50,19 @@ public class LottaCashMummy
             var buffer = this.tls.Value!;
             var currentBatchSpins = CalculateBatchSpins(totalSpins, batchIndex, BATCH_SIZE);
 
+            buffer.SpinStats.Reset();
+
             for (long i = 0; i < currentBatchSpins; i++)
             {
                 buffer.Clear();
                 baseService.SimulateSingleSpin(buffer);
-                
-                // TODO: 데이터베이스에 저장
-                //baseRepository.SaveSpinResult(buffer);
             }
 
+            dbRepository.UpsertBaseGame(buffer.SpinStats.BaseStats);
+            dbRepository.UpsertFeatureGame(buffer.SpinStats.FeatureStats);
+
             Interlocked.Add(ref progress, currentBatchSpins);
-            config.MergeFromBuffer(buffer);
+            //config.MergeFromBuffer(buffer);
         });
     }
 
@@ -92,7 +94,7 @@ public class LottaCashMummy
             foreach (var symbolType in symbolOrder)
             {
                 byte symbol = (byte)symbolType;
-                var count = baseRepository.GetTotalPayWinAmount(symbol, hits);
+                var count = dbRepository.GetTotalPayWinAmount(symbol, hits);
                 var probability = (count / (double)totalSpins) * 100; // 확률 계산
                 Console.WriteLine($"{symbolType} {hits,-8} {count,10:N0} {probability,10:F4}%");
                 totalCount += count; // 카운트 업데이트
@@ -102,6 +104,41 @@ public class LottaCashMummy
         var totalProbability = (totalCount / (double)totalSpins) * 100;
         Console.WriteLine(new string('-', 40));
         Console.WriteLine($"Total        {totalCount,10:N0} {totalProbability,10:F4}%");
+    }
+
+    public void PrintFeatureEnterStats(long totalSpins)
+    {
+        Console.WriteLine();
+        Console.WriteLine("Feature Enter Statistics:");
+        Console.WriteLine($"Total Spins: {totalSpins:N0}\n");
+
+        var header = String.Format(
+            "{0,-20} {1,10} {2,10} {3,15} {4,15} {5,15} {6,15} {7,15} {8,15} {9,15} {10,15}",
+            "Type", "Gems", "Level", "EnterCnt", "SpinCnt", "GemCnt", "GemValue", "CoinWithRedCnt", "CoinWithRedValue", "CoinNoRedCnt", "CoinNoRedValue");
+
+        Console.WriteLine(header);
+        Console.WriteLine(new string('-', 150));
+
+        foreach (FeatureBonusType type in BonusTypeConverter.CombiTypeOrder.Keys)
+        {
+            for (int gem = 1; gem <= 5; gem++)
+            {
+                for (byte level = 1; level <= 4; level++)
+                {
+                    var enterCount = dbRepository.GetTotalFeatureLevelCount(type, gem, level);
+                    var spinCount = dbRepository.GetTotalFeatureSpinCount(type, gem, level);
+                    var gemCount = dbRepository.GetTotalFeatureGemCount(type, gem, level);
+                    var gemValue = dbRepository.GetTotalFeatureGemValue(type, gem, level);
+                    var coinWithRedCount = dbRepository.GetTotalFeatureCoinWithRedCount(type, gem, level);
+                    var coinWithRedValue = dbRepository.GetTotalFeatureCoinWithRedValue(type, gem, level);
+                    var coinNoRedCount = dbRepository.GetTotalFeatureCoinNoRedCount(type, gem, level);
+                    var coinNoRedValue = dbRepository.GetTotalFeatureCoinNoRedValue(type, gem, level);
+                    //var probability = (enterCount / (double)totalSpins) * 100;
+                    Console.WriteLine($"{type, -20} {gem, 10} {level, 10} {enterCount, 15:N0} {spinCount, 15:N0} {gemCount, 15:N0} {gemValue, 15:N0} {coinWithRedCount, 15:N0} {coinWithRedValue, 15:N0} {coinNoRedCount, 15:N0} {coinNoRedValue, 15:N0}");
+                }
+            }
+            Console.WriteLine(new string('-', 150));
+        }
     }
 
     private static void PrintFeatureEnterStats(SimulationStats state)

@@ -6,9 +6,9 @@ namespace LottaCashMummy.Buffer;
 
 public class BaseStorage
 {
-    private readonly IDbRepository baseRepository;
+    private readonly IDbRepository dbRepository;
     private static readonly byte[,] symbolIndexLookup;
-    private readonly SpinStatistics spinStats;
+    private readonly SlotStats spinStats;
 
     private readonly byte[] symbols;        // 심볼 타입
     private readonly byte[] jackpots;       // 잭팟 정보
@@ -38,10 +38,10 @@ public class BaseStorage
         }
     }
 
-    public BaseStorage(SpinStatistics spinStats, IDbRepository baseRepository)
+    public BaseStorage(SlotStats spinStats, IDbRepository dbRepository)
     {
         this.spinStats = spinStats;
-        this.baseRepository = baseRepository;
+        this.dbRepository = dbRepository;
 
         symbols = new byte[SlotConst.TOTAL_POSITIONS];
         normalIndices = new byte[SlotConst.TOTAL_POSITIONS];

@@ -43,11 +43,11 @@ public class TestPayTable : IPayTable
 public class PayoutTests
 {
     private readonly BasePayout payout;
-    private readonly SpinStatistics spinStats;
+    private readonly SlotStats spinStats;
 
     public PayoutTests()
     {
-        spinStats = new SpinStatistics();
+        spinStats = new SlotStats();
         payout = new BasePayout(new TestPayTable());
     }
 

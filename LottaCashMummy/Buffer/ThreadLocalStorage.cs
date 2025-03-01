@@ -18,14 +18,14 @@ public class ThreadLocalStorage
     public FeatureStorage FeatureStorage => featureStorage;
 
 
-    private readonly SpinStatistics spinStats;
-    public SpinStatistics SpinStats => spinStats;
+    private readonly SlotStats spinStats;
+    public SlotStats SpinStats => spinStats;
 
-    public ThreadLocalStorage(IDbRepository baseRepository)
+    public ThreadLocalStorage(IDbRepository dbRepository)
     {
         random = new Random(SEED);
-        spinStats = new SpinStatistics();
-        baseStorage = new BaseStorage(spinStats, baseRepository);
+        spinStats = new SlotStats();
+        baseStorage = new BaseStorage(spinStats, dbRepository);
         featureStorage = new FeatureStorage(spinStats);
     }
 
@@ -33,7 +33,6 @@ public class ThreadLocalStorage
     {
         baseStorage.Clear();
         featureStorage.Clear();
-        spinStats.Clear();
     }
 
     // [MethodImpl(MethodImplOptions.AggressiveInlining)]

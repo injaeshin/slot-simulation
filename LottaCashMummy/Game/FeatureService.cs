@@ -1,8 +1,5 @@
-using System.Runtime.InteropServices;
+
 using LottaCashMummy.Buffer;
-using LottaCashMummy.Common;
-using LottaCashMummy.Database;
-using Microsoft.VisualBasic;
 
 namespace LottaCashMummy.Game;
 
@@ -29,7 +26,7 @@ public class FeatureService
     private void Init(BaseStorage bs, FeatureStorage fs, Random random)
     {
         setup.Init(bs, fs, random);
-        fs.FeatureEnter();
+        fs.Enter();
     }
 
     // private static byte[] requiredGemToNextLevel = [0, 5, 4, 3, 255];
@@ -39,6 +36,7 @@ public class FeatureService
 
     private void Spin(FeatureStorage fs, Random random)
     {
+
         if (fs.GemCount > 0)
         {
             symbolCollect.CollectGemScreenArea(fs);
@@ -46,15 +44,17 @@ public class FeatureService
 
         while (fs.UseSpinCount())
         {
+            fs.AddSpinCount();
+
             // 심볼 생성
-            symbol.CreateWithMummyArea(fs, random, isRespin: false);
+            //symbol.CreateWithMummyArea(fs, random, isRespin: false);
             symbol.CreateWithoutMummyArea(fs, random);
 
             // 머미 영역 심볼 획득
             var hasRedCoin = symbolCollect.CollectCoinInMummyArea(fs, isRespin: false);
             if (hasRedCoin)
             {
-                Respin(fs, random);
+                //Respin(fs, random);
             }
 
             symbolCollect.CollectGemScreenArea(fs);
@@ -63,39 +63,83 @@ public class FeatureService
             fs.ClearSymbolInScreenArea();
         }
 
-        // int level = 1;
-        // var gemCount = 0;
-        // var spinCount = 0;
+        //var value = new double[] { 500, 100, 80, 60, 50, 40, 30, 20, 15, 12.5, 10, 8, 5, 4, 3, 2, 1, 0.5 };
+        //var weight = new int[] { 1, 4, 10, 10, 15, 15, 15, 15, 15, 15, 15, 20, 20, 20, 20, 30, 300, 500 };
+        //var cumulativeWeight = new int[value.Length];
+        //cumulativeWeight[0] = weight[0];
+        //for (int i = 1; i < value.Length; i++)
+        //{
+        //    cumulativeWeight[i] = cumulativeWeight[i - 1] + weight[i];
+        //}
 
-        // fs.SpinStats.Feature.AddTestEnterCount();
+        ////int level = 1;
+        //var spinCount = 0;
+        ////var gemCount = 0;
 
-        // while (fs.UseSpinCount())
-        // {
-        //     spinCount++;
-        //     fs.SpinStats.Feature.AddTestTotalSpinCount(level);
+        ////var coinCount = 0;
+        ////var coinValue = 0.0;
 
-        //     for (byte idx = 0; idx < screenLength; idx++)
-        //     {
-        //         if (ignoreSlot[level] < idx)
-        //             continue;
+        //var screenLength = 21;
+        ////var ignoreSlot = new byte[] { 0, 25 - 4, 25 - 9, 25 - 16, 25 };
+        ////var levelByProbability = new byte[] { 0, 3, 3, 2, 0 };
 
-        //         if (level < 4 && random.Next(1, 101) <= levelByProbability[level])
-        //         {
-        //             gemCount++;
-        //             fs.SpinStats.Feature.AddTestTotalCreateGemCount(level);
-        //         }
+        //while (fs.UseSpinCount())
+        //{
+        //    spinCount++;
+        //    fs.AddSpinCount();
 
-        //         if (gemCount == requiredGemToNextLevel[level])
-        //         {
-        //             fs.SpinStats.Feature.AddTestLevelEnterCount(level);
-        //             fs.SpinStats.Feature.AddTestTotalLevelUpSuccessSpinCount(level);
-        //             fs.AddBonusSpinCount(bonusSpinCount[level]);
-        //             spinCount = 0;
-        //             gemCount = 0;
-        //             level++;
-        //         }
-        //     }
-        // }
+        //    for (byte idx = 0; idx < screenLength; idx++)
+        //    {
+        //        // if (ignoreSlot[level] < idx)
+        //        //     continue;
+
+        //        var n = random.Next(0, 100);
+
+        //        if (n < 5)//levelByProbability[level])
+        //        {
+        //            //gemCount++;
+        //            fs.TestAddGemCount();
+        //        }
+        //        // coin은 5+17 = 22
+        //        else if (n < 22)
+        //        {
+        //            //coinCount++;
+        //            fs.TestAddCoinCount();
+        //            var cv = random.Next(0, cumulativeWeight[cumulativeWeight.Length - 1]);
+
+        //            int selectedIndex = -1;
+        //            for (int i = 0; i < cumulativeWeight.Length; i++)
+        //            {
+        //                if (cv < cumulativeWeight[i])
+        //                {
+        //                    selectedIndex = i;
+        //                    break;
+        //                }
+        //            }
+
+        //            if (selectedIndex == -1)
+        //            {
+        //                throw new Exception($"Invalid cumulative weight {cv}");
+        //            }
+
+        //            var selectedValue = value[selectedIndex];
+        //            fs.TestAddCoinValue(selectedValue);
+        //            //coinValue += selectedValue;
+        //        }
+
+
+        //        // if (gemCount == requiredGemToNextLevel[level])
+        //        // {
+        //        //     fs.SpinStats.Feature.AddTestLevelEnterCount(level);
+        //        //     fs.SpinStats.Feature.AddTestTotalLevelUpSuccessSpinCount(level);
+        //        //     fs.AddBonusSpinCount(bonusSpinCount[level]);
+        //        //     spinCount = 0;
+        //        //     gemCount = 0;
+        //        //     level++;
+        //        // }
+        //    }
+        //}
+
     }
 
     private void Respin(FeatureStorage fs, Random random)

@@ -15,15 +15,11 @@ public class BaseSpinModel
 [Table("base_payout")]
 public class BasePayoutModel
 {
-    [PrimaryKey, AutoIncrement]
-    //[ColumnMapping("id")]
-    public int Id { get; set; }
-
-    [NotNull]
+    [PrimaryKey]
     //[ColumnMapping("sym_type")]
     public SymbolType SymbolType { get; set; }
 
-    [NotNull]
+    [PrimaryKey]
     //[ColumnMapping("hit")]
     public int Hit { get; set; }
 

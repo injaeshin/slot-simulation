@@ -17,6 +17,7 @@ public interface IDatabaseConnection : IDisposable
     Task<int> ExecuteAsync(string sql, object? param = null);
 
     IDbTransaction BeginTransaction();
+    IDbCommand CreateCommand();
     void Open();
 }
 
@@ -73,5 +74,10 @@ public class DbConnection : IDatabaseConnection, IDisposable
     public IDbTransaction BeginTransaction()
     {
         return Connection.BeginTransaction();
+    }
+
+    public IDbCommand CreateCommand()
+    {
+        return Connection.CreateCommand();
     }
 }

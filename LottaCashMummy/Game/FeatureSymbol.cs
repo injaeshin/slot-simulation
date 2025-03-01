@@ -25,7 +25,7 @@ public class FeatureSymbol
 
         var includeRedCoin = isRespin == false;
         var bonusCombiType = BonusTypeConverter.Convert(fs.FeatureBonusType, includeRedCoin);
-         
+
         if (isRespin && includeRedCoin)
         {
             throw new Exception("");
@@ -70,17 +70,38 @@ public class FeatureSymbol
 
     public void CreateWithoutMummyArea(FeatureStorage fs, Random random)
     {
-        var level = fs.Mummy.Level;
-        var mummyArea = fs.MummyArea;
+        //var level = fs.Mummy.Level;
+        //var mummyArea = fs.MummyArea;
 
-        // 비머미 영역 인덱스 구하기
-        Span<int> nonMummyIndices = stackalloc int[mummyArea.Length];
-        int nonMummyCount = GetAreaIndices(fs, nonMummyIndices, false);
-        int targetSymbolIdx = (nonMummyCount > 0) ? GetSplitSymbolIdx(fs, random, nonMummyIndices[..nonMummyCount]) : -1;
+        //// 비머미 영역 인덱스 구하기
+        //Span<int> nonMummyIndices = stackalloc int[mummyArea.Length];
+        //int nonMummyCount = GetAreaIndices(fs, nonMummyIndices, false);
+        //int targetSymbolIdx = (nonMummyCount > 0) ? GetSplitSymbolIdx(fs, random, nonMummyIndices[..nonMummyCount]) : -1;
 
-        var bonusCombiType = BonusTypeConverter.Convert(fs.FeatureBonusType, false);
+        //var bonusCombiType = BonusTypeConverter.Convert(fs.FeatureBonusType, false);
 
-        // 비머미 영역만 루프
+        //// 비머미 영역만 루프
+        //for (int i = 0; i < nonMummyCount; i++)
+        //{
+        //    int idx = nonMummyIndices[i];
+
+        //    var featureSymbolType = featureData.FeatureSymbol.GetRollSymbolSelectWithGem(level, random);
+        //    if (featureSymbolType == FeatureSymbolType.Blank)
+        //    {
+        //        fs.AddSymbol(idx, FeatureSymbolType.Blank, FeatureBonusValueType.None, 0);
+        //        continue;
+        //    }
+
+        //    var symbolValue = featureData.FeatureSymbol.GetRollSymbolValues(level, bonusCombiType, random);
+        //    fs.AddSymbol(idx, featureSymbolType, symbolValue.BonusType, symbolValue.Value);
+
+        //    if (targetSymbolIdx == idx)
+        //    {
+        //        symbolValue = featureData.FeatureSymbol.GetRollSymbolValues(level, bonusCombiType, random);
+        //        fs.AddSymbol(idx, featureSymbolType, symbolValue.BonusType, symbolValue.Value);
+        //    }
+        //}
+
         for (int i = 0; i < nonMummyCount; i++)
         {
             int idx = nonMummyIndices[i];

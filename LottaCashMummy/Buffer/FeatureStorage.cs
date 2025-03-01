@@ -5,7 +5,7 @@ namespace LottaCashMummy.Buffer;
 
 public class FeatureStorage
 {
-    private readonly SpinStatistics spinStats;
+    private readonly SlotStats spinStats;
 
     private readonly MummyState mummy;
     public MummyState Mummy => mummy;
@@ -35,7 +35,7 @@ public class FeatureStorage
     public int CoinCount { get; private set; }
     public int MummyAreaCount { get; private set; }
 
-    public FeatureStorage(SpinStatistics spinStats)
+    public FeatureStorage(SlotStats spinStats)
     {
         this.spinStats = spinStats;
         mummy = new MummyState();
@@ -139,10 +139,9 @@ public class FeatureStorage
             case FeatureSymbolType.Coin:
                 AddCoinSymbol(idx, bonusType, value);
                 if (isRespin)
-                    spinStats.AddRespinCreateCoinCount();
+                    spinStats.AddRespinCreateCoinCount(featureBonusType, initGemCount, mummy.Level);
                 else
-                    spinStats.AddCreateCoinCount(FeatureBonusType);
-                    //spinStats.GetFeatureStats(FeatureBonusType).IncrementCreateCoinCount(FeatureBonusType, mummy.Level, initGemCount);
+                    spinStats.AddCreateCoinCount(featureBonusType, initGemCount, mummy.Level);
                 break;
             case FeatureSymbolType.Gem:
                 AddGemSymbol(idx, bonusType, value);
@@ -150,8 +149,7 @@ public class FeatureStorage
                     throw new Exception("Gem is not allowed to be respin");
                 else
                 {
-                    spinStats.AddCreateGemCount();
-                    //spinStats.GetFeatureStats(FeatureBonusType).IncrementCreateGemCount(mummy.Level, initGemCount);
+                    spinStats.AddCreateGemCount(featureBonusType, initGemCount, mummy.Level);
                 }
                 break;
             default:
@@ -198,17 +196,15 @@ public class FeatureStorage
         }
 
         remainSpinCount--;
-        spinStats.AddFeatureSpinCount();
-        //spinStats.GetFeatureStats(FeatureBonusType).IncrementSpinCount(mummy.Level, initGemCount);
+        spinStats.AddObtainRespinCount(featureBonusType, initGemCount, mummy.Level);
 
         return true;
     }
 
-    public void FeatureEnter()
+    public void Enter()
     {
         remainSpinCount = SlotConst.FEATURE_SPIN_COUNT;
-        spinStats.AddLevel();
-        //spinStats.GetFeatureStats(FeatureBonusType).IncrementLevelUpCount(mummy.Level, initGemCount);
+        spinStats.AddLevel(featureBonusType, initGemCount, mummy.Level);
     }
 
     //public void AddWinAmount(double amount) => TotalWinAmount += amount;
@@ -225,8 +221,7 @@ public class FeatureStorage
             throw new Exception("Level Up failed");
         }
 
-        spinStats.AddLevel();
-        //spinStats.GetFeatureStats(FeatureBonusType).IncrementLevelUpCount(mummy.Level, initGemCount);
+        spinStats.AddLevel(featureBonusType, initGemCount, mummy.Level);
 
         return true;
     }
@@ -238,21 +233,19 @@ public class FeatureStorage
         {
             case FeatureBonusValueType.RedCoin:
                 hasRedCoin = true;
-                spinStats.AddRedCoinCount();
+                spinStats.AddRedCoinCount(featureBonusType, initGemCount, mummy.Level);
                 if (isRespin)
                     throw new Exception("Red coin is not allowed to be respin");
-                //spinStats.GetFeatureStats(FeatureBonusType).IncrementRedCoinCount(mummy.Level, initGemCount);
                 break;
             case FeatureBonusValueType.Spin:
                 AddBonusSpinCount(1);
-                spinStats.AddFreeSpinCoinCount();
-                //spinStats.GetFeatureStats(FeatureBonusType).IncrementFreeSpinCoinCount(mummy.Level, initGemCount);
+                spinStats.AddFreeSpinCoinCount(featureBonusType, initGemCount, mummy.Level);
                 break;
             default: // Coin or Jackpot
                 if (isRespin)
-                    spinStats.AddRespinObtainCoinValue(symbol.Value);
+                    spinStats.AddRespinObtainCoinValue(featureBonusType, initGemCount, mummy.Level, symbol.Value);
                 else
-                    spinStats.AddObtainCoinValue(FeatureBonusType, symbol.Value);
+                    spinStats.AddObtainCoinValue(featureBonusType, initGemCount, mummy.Level, symbol.Value);
                 break;
         }
 
@@ -273,15 +266,36 @@ public class FeatureStorage
             if (isRespin)
                 throw new Exception("Gem is not allowed to be respin");
             else
-                spinStats.AddObtainGemValue(symbol.Value);
+                spinStats.AddObtainGemValue(featureBonusType, initGemCount, mummy.Level, symbol.Value);
         }
 
         symbol.Clear();
     }
 
+    public void AddSpinCount()
+    {
+        spinStats.AddFeatureSpinCount(featureBonusType, initGemCount, mummy.Level);
+    }
+
     public void AddRespinCount()
     {
-        spinStats.AddRespinCount();
-        //spinStats.GetFeatureStats(FeatureBonusType).IncrementRespinCount(mummy.Level, initGemCount);
+        spinStats.AddObtainRespinCount(featureBonusType, initGemCount, mummy.Level);
+    }
+
+
+
+    public void TestAddGemCount()
+    {
+        spinStats.AddCreateGemCount(featureBonusType, initGemCount, mummy.Level);
+    }
+
+    public void TestAddCoinCount()
+    {
+        spinStats.AddCreateCoinCount(featureBonusType, initGemCount, mummy.Level);
+    }
+
+    public void TestAddCoinValue(double value)
+    {
+        spinStats.AddObtainCoinValue(featureBonusType, initGemCount, mummy.Level, value);
     }
 }

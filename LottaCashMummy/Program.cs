@@ -27,28 +27,32 @@ class Program
             .Build();
 
         var dbSettings = new DatabaseSettings();
-        configuration.GetSection("DatabaseSettings").Bind(dbSettings);
+        //configuration.GetSection("DatabaseSettings").Bind(dbSettings);
 
         var services = new ServiceCollection();
         services.AddSingleton(dbSettings);
         services.AddSingleton<IConfiguration>(configuration);
-        
+
+        var connectionString = dbSettings.UseInMemoryDatabase
+            ? DbConnectionPool.CreateSharedMemoryConnectionString()
+            : DbConnectionPool.CreateLocalFileConnectionString(dbSettings.DatabasePath);
+
+        Console.WriteLine($"Database Settings: {dbSettings.UseInMemoryDatabase} Connection String: {connectionString}");
+
         // 연결 풀 등록
-        services.AddSingleton<DbConnectionPool>(provider => 
+        services.AddSingleton<DbConnectionPool>(provider =>
             new DbConnectionPool(
-                provider.GetRequiredService<DatabaseSettings>().UseInMemoryDatabase 
-                    ? DbConnectionPool.CreateSharedMemoryConnectionString() 
-                    : $"Data Source={provider.GetRequiredService<DatabaseSettings>().DatabasePath}",
-                provider.GetRequiredService<DatabaseSettings>().ConnectionPoolSize,
-                provider.GetRequiredService<DatabaseSettings>().AutoCreateTables
+                connectionString,
+                dbSettings.ConnectionPoolSize,
+                dbSettings.AutoCreateTables
             )
         );
-        
+
         // 리포지토리 등록
-        services.AddSingleton<IDbRepository>(provider => 
+        services.AddSingleton<IDbRepository>(provider =>
             new DbRepository(provider.GetRequiredService<DbConnectionPool>())
         );
-        
+
         services.AddTransient<Application>();
 
         var serviceProvider = services.BuildServiceProvider();
@@ -60,19 +64,19 @@ class Program
 public class Application
 {
     private readonly IConfiguration configuration;
-    private readonly IDbRepository baseRepository;
+    private readonly IDbRepository dbRepository;
 
     //private const int TOTAL_ITERATIONS = 1_000_000_000;
     private const int TOTAL_ITERATIONS = 312_500_000;
     private static readonly int THREAD_COUNT = Environment.ProcessorCount;
 
-    //private const int TOTAL_ITERATIONS = 1_500_000;
+    //private const int TOTAL_ITERATIONS = 1_000_000;
     //private static readonly int THREAD_COUNT = 1;
 
-    public Application(IConfiguration conf, IDbRepository baseRepo)
+    public Application(IConfiguration conf, IDbRepository dbRepository)
     {
         this.configuration = conf;
-        this.baseRepository = baseRepo;
+        this.dbRepository = dbRepository;
     }
 
     public async Task RunAsync()
@@ -99,7 +103,7 @@ public class Application
         Console.WriteLine("Progress: ");
 
         // 이미 DI를 통해 주입된 리포지토리 사용
-        var game = new LottaCashMummy(baseData, featureData, jackpotData, baseRepository);
+        var game = new LottaCashMummy(baseData, featureData, jackpotData, dbRepository);
 
         // 진행상황 출력을 위한 타이머
         var progressTimer = new Timer(_ =>
@@ -127,7 +131,7 @@ public class Application
         sw.Stop();
 
         game.PrintPayWinResult(TOTAL_ITERATIONS);
-        //PrintFeatureEnterStats(config);
+        game.PrintFeatureEnterStats(TOTAL_ITERATIONS);
         //CalculateAndPrintGemProbabilities(config);
 
         //PrintFeatureTestStats(config);
