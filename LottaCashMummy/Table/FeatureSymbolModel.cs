@@ -25,7 +25,7 @@ public class FeatureSymbolValueModel(string[] value, string[] weight, string[] t
     public string[] Type { get; set; } = type;
 }
 
-public class FeatureSymbolModelParser
+public class SymbolModelParser
 {
     public static readonly Dictionary<int, string> SymbolLevelKeys = new()
     {
@@ -34,10 +34,10 @@ public class FeatureSymbolModelParser
         { 3, "4x4" },
         { 4, "5x5" },
     };
-    private static readonly string[] SymbolSelectKeys = new[] { "BonusSpin", "CollectSpin", "Symbol" };
-    private static readonly string[] SymbolValueKeys = new[] { "CollectWithRedCoin", "CollectNoRedCoin", "Spins", "Symbols", "CollectSpinsWithRedCoin", "CollectSpinsNoRedCoin", "CollectSymbolsWithRedCoin", "CollectSymbolsNoRedCoin", "SpinsSymbols", "AllFeaturesWithRedCoin", "AllFeaturesNoRedCoin" };
+    public static readonly string[] SymbolSelectKeys = new[] { "BonusSpin", "CollectSpin", "Symbol" };
+    public static readonly string[] SymbolValueKeys = new[] { "CollectWithRedCoin", "CollectNoRedCoin", "Spins", "Symbols", "CollectSpinsWithRedCoin", "CollectSpinsNoRedCoin", "CollectSymbolsWithRedCoin", "CollectSymbolsNoRedCoin", "SpinsSymbols", "AllFeaturesWithRedCoin", "AllFeaturesNoRedCoin" };
 
-    private FeatureSymbolType GetSymbolType(string symbol)
+    public static FeatureSymbolType GetSymbolType(string symbol)
     {
         return symbol switch
         {
@@ -48,65 +48,42 @@ public class FeatureSymbolModelParser
         };
     }
 
-    private FeatureBonusValueType GetFeatureBonusValueType(string type)
+    public static FeatureBonusValueType GetFeatureBonusValueType(string type)
     {
         return type switch
         {
-            "Jackpot" => FeatureBonusValueType.Jackpot,
+            //"Jackpot" => FeatureBonusValueType.Jackpot,
             "Spin" => FeatureBonusValueType.Spin,
             "RedCoin" => FeatureBonusValueType.RedCoin,
-            _ => FeatureBonusValueType.None,
+            _ => FeatureBonusValueType.Pay,
         };
     }
 
-    private FeatureBonusCombiType GetFeatureBonusCombiType(string type)
-    {
-        return type switch
-        {
-            "CollectWithRedCoin" => FeatureBonusCombiType.CollectWithRedCoin,
-            "CollectNoRedCoin" => FeatureBonusCombiType.CollectNoRedCoin,
-            "Spins" => FeatureBonusCombiType.Spins,
-            "Symbols" => FeatureBonusCombiType.Symbols,
-            "CollectSpinsWithRedCoin" => FeatureBonusCombiType.CollectSpinsWithRedCoin, 
-            "CollectSpinsNoRedCoin" => FeatureBonusCombiType.CollectSpinsNoRedCoin,
-            "CollectSymbolsWithRedCoin" => FeatureBonusCombiType.CollectSymbolsWithRedCoin,
-            "CollectSymbolsNoRedCoin" => FeatureBonusCombiType.CollectSymbolsNoRedCoin,
-            "SpinsSymbols" => FeatureBonusCombiType.SpinsSymbols,
-            "AllFeaturesWithRedCoin" => FeatureBonusCombiType.AllFeaturesWithRedCoin,
-            "AllFeaturesNoRedCoin" => FeatureBonusCombiType.AllFeaturesNoRedCoin,
-            _ => FeatureBonusCombiType.None,
-        };
-    }
+    // public FeatureSymbolByLevel Read(GameDataLoader kv, int level)
+    // {
+    //     if (!SymbolLevelKeys.TryGetValue(level, out var symbolLevelKey))
+    //     {
+    //         throw new Exception($"Invalid level: {level}");
+    //     }
 
-    public FeatureSymbolByLevel Read(GameDataLoader kv, int level)
-    {
-        if (!SymbolLevelKeys.TryGetValue(level, out var symbolLevelKey))
-        {
-            throw new Exception($"Invalid level: {level}");
-        }
+    //     var (screenAreaSymbols, screenAreaSymbolsTotalWeight) = ReadSymbolWeights(kv, symbolLevelKey, SymbolSelectKeys[0]);
+    //     var (mummyAreaSymbols, mummyAreaSymbolsTotalWeight) = ReadSymbolWeights(kv, symbolLevelKey, SymbolSelectKeys[1]);
+    //     var (symbolSplitSelect, symbolSplitSelectTotalWeight) = ReadSymbolSplitSelect(kv, symbolLevelKey, SymbolSelectKeys[2]);
 
-        var (symbolSelectWithGem, symbolSelectWithGemTotalWeight) = ReadSymbolSelect(kv, symbolLevelKey, SymbolSelectKeys[0]);
-        var (symbolSelectNoGem, symbolSelectNoGemTotalWeight) = ReadSymbolSelect(kv, symbolLevelKey, SymbolSelectKeys[1]);
-        var (symbolSplitSelect, symbolSplitSelectTotalWeight) = ReadSymbolSplitSelect(kv, symbolLevelKey, SymbolSelectKeys[2]);
+    //     var fs = new FeatureSymbolByLevel_Renew
+    //     { 
+    //         ScreenAreaSymbols = screenAreaSymbols,
+    //         MummyAreaSymbols = mummyAreaSymbols,
+    //         SymbolSplitSelect = symbolSplitSelect,
+    //     };
 
-        var fs = new FeatureSymbolByLevel
-        { 
-            Level = level,
-            SymbolSelectWithGem = symbolSelectWithGem,
-            SymbolSelectWithGemTotalWeight = symbolSelectWithGemTotalWeight,
-            SymbolSelectNoGem = symbolSelectNoGem,
-            SymbolSelectNoGemTotalWeight = symbolSelectNoGemTotalWeight,
-            SymbolSplitSelect = symbolSplitSelect,
-            SymbolSplitSelectTotalWeight = symbolSplitSelectTotalWeight,
-        };
+    //     ReadSymbolValues(kv, symbolLevelKey, fs);
+    //     fs.ExpandAllValues();
 
-        ReadSymbolValues(kv, symbolLevelKey, fs);
-        fs.ExpandAllValues();
+    //     return fs;
+    // }
 
-        return fs;
-    }
-
-    private (FeatureSymbolSelect[], int) ReadSymbolSelect(GameDataLoader kv, string levelKey, string symbolSelectKey)
+    public static (FeatureSymbolType[], int) ReadSymbolWeights(GameDataLoader kv, string levelKey, string symbolSelectKey)
     {
         var key = $"{levelKey}_{symbolSelectKey}";
         if (!kv.TryGetValue(key, out var json))
@@ -116,22 +93,23 @@ public class FeatureSymbolModelParser
             ?? throw new Exception($"Invalid SymbolSelect format: {key}");
 
         var weights = model.Weight.Select(int.Parse).ToArray();
-        var result = new FeatureSymbolSelect[model.Symbol.Length];
-        var accumulatedWeight = 0;
+        var totalWeight = weights.Sum();
+        var result = new FeatureSymbolType[totalWeight];
 
+        int currentIndex = 0;
         for (int i = 0; i < model.Symbol.Length; i++)
         {
-            accumulatedWeight += weights[i];
-            result[i] = new FeatureSymbolSelect(
-                GetSymbolType(model.Symbol[i]),
-                accumulatedWeight
-            );
+            var weight = weights[i];
+            for (int j = 0; j < weight; j++)
+            {
+                result[currentIndex++] = GetSymbolType(model.Symbol[i]);
+            }
         }
 
-        return (result, accumulatedWeight);
+        return (result, totalWeight);
     }
 
-    private (FeatureSymbolSplitSelect[], int) ReadSymbolSplitSelect(GameDataLoader kv, string levelKey, string symbolSplitSelectKey)
+    public static (int[], int) ReadSymbolSplitSelect(GameDataLoader kv, string levelKey, string symbolSplitSelectKey)
     {
         var key = $"{levelKey}_{symbolSplitSelectKey}";
         if (!kv.TryGetValue(key, out var json))
@@ -141,30 +119,34 @@ public class FeatureSymbolModelParser
             ?? throw new Exception($"Invalid Symbol format: {key}");
 
         var weights = model.Weight.Select(int.Parse).ToArray();
-        var result = new FeatureSymbolSplitSelect[model.Quantity.Length];
-        var accumulatedWeight = 0;
+        var totalWeight = weights.Sum();
+        var result = new int[totalWeight];
 
+        int currentIndex = 0;
         for (int i = 0; i < model.Quantity.Length; i++)
         {
-            accumulatedWeight += weights[i];
-            result[i] = new FeatureSymbolSplitSelect(
-                int.Parse(model.Quantity[i]),
-                accumulatedWeight
-            );
+            var weight = weights[i];
+            for (int j = 0; j < weight; j++)
+            {
+                result[currentIndex++] = int.Parse(model.Quantity[i]);
+            }
         }
 
-        return (result, accumulatedWeight);
+        return (result, totalWeight);
     }
 
-    private void ReadSymbolValues(GameDataLoader kv, string levelKey, FeatureSymbolByLevel fs)
+    public static (FeatureSymbolValue[][] values, int[] totalWeights) ReadSymbolValues(GameDataLoader kv, string levelKey)
     {
+        var result = new FeatureSymbolValue[SymbolValueKeys.Length][];
+        var totalWeights = new int[SymbolValueKeys.Length];
+
         foreach (var valueKey in SymbolValueKeys)
         {
             var key = $"{levelKey}_{valueKey}";
             if (!kv.TryGetValue(key, out var json))
                 throw new Exception($"SymbolValues not found: {key}");
 
-            var combiType = GetFeatureBonusCombiType(valueKey);
+            var combiType = BonusTypeConverter.StringToCombiType(valueKey);
             if (combiType == FeatureBonusCombiType.None)
                 throw new Exception($"Invalid symbol value type: {valueKey}");
 
@@ -172,20 +154,57 @@ public class FeatureSymbolModelParser
                 ?? throw new Exception($"Invalid SymbolValues format: {key}");
 
             var weights = model.Weight.Select(int.Parse).ToArray();
-            var symbolValues = new FeatureSymbolValue[model.Value.Length];
-            var accumulatedWeight = 0;
+            var totalWeight = weights.Sum();
+            var symbolValues = new FeatureSymbolValue[totalWeight];
 
+            int currentIndex = 0;
             for (int i = 0; i < model.Value.Length; i++)
             {
-                accumulatedWeight += weights[i];
-                symbolValues[i] = new FeatureSymbolValue(
-                    double.Parse(model.Value[i]),
-                    accumulatedWeight,
-                    GetFeatureBonusValueType(model.Type[i])
-                );
+                var weight = weights[i];
+                for (int j = 0; j < weight; j++)
+                {
+                    symbolValues[currentIndex++] = new FeatureSymbolValue(GetFeatureBonusValueType(model.Type[i]), double.Parse(model.Value[i]));
+                }
             }
 
-            fs.SetSymbolValues(combiType, symbolValues, accumulatedWeight);
+            var combiIdx = BonusTypeConverter.GetCombiTypeIndex(combiType);
+            result[combiIdx] = symbolValues;
+            totalWeights[combiIdx] = totalWeight;
         }
+
+        return (result, totalWeights);
     }
+
+    // private void ReadSymbolValues(GameDataLoader kv, string levelKey, FeatureSymbolByLevel fs)
+    // {
+    //     foreach (var valueKey in SymbolValueKeys)
+    //     {
+    //         var key = $"{levelKey}_{valueKey}";
+    //         if (!kv.TryGetValue(key, out var json))
+    //             throw new Exception($"SymbolValues not found: {key}");
+
+    //         var combiType = GetFeatureBonusCombiType(valueKey);
+    //         if (combiType == FeatureBonusCombiType.None)
+    //             throw new Exception($"Invalid symbol value type: {valueKey}");
+
+    //         var model = JsonSerializer.Deserialize<FeatureSymbolValueModel>(json.ToString()!, JsonOptions.Opt)
+    //             ?? throw new Exception($"Invalid SymbolValues format: {key}");
+
+    //         var weights = model.Weight.Select(int.Parse).ToArray();
+    //         var symbolValues = new FeatureSymbolValue[model.Value.Length];
+    //         var accumulatedWeight = 0;
+
+    //         for (int i = 0; i < model.Value.Length; i++)
+    //         {
+    //             accumulatedWeight += weights[i];
+    //             symbolValues[i] = new FeatureSymbolValue(
+    //                 double.Parse(model.Value[i]),
+    //                 accumulatedWeight,
+    //                 GetFeatureBonusValueType(model.Type[i])
+    //             );
+    //         }
+
+    //         fs.SetSymbolValues(combiType, symbolValues, accumulatedWeight);
+    //     }
+    // }
 }

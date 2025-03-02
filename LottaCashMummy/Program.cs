@@ -67,11 +67,16 @@ public class Application
     private readonly IDbRepository dbRepository;
 
     //private const int TOTAL_ITERATIONS = 1_000_000_000;
+#if DEBUG
+    private const int TOTAL_ITERATIONS = 1_000_000;
+    private static readonly int THREAD_COUNT = 1;
+#else
     private const int TOTAL_ITERATIONS = 312_500_000;
     private static readonly int THREAD_COUNT = Environment.ProcessorCount;
+#endif
 
-    //private const int TOTAL_ITERATIONS = 1_000_000;
-    //private static readonly int THREAD_COUNT = 1;
+
+
 
     public Application(IConfiguration conf, IDbRepository dbRepository)
     {

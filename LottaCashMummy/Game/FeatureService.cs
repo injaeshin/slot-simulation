@@ -20,7 +20,7 @@ public class FeatureService
     public void Execute(ThreadLocalStorage tls)
     {
         Init(tls.BaseStorage, tls.FeatureStorage, tls.Random);
-        Spin(tls.FeatureStorage, tls.Random);
+        Spin(tls.FeatureStorage);
     }
 
     private void Init(BaseStorage bs, FeatureStorage fs, Random random)
@@ -34,27 +34,40 @@ public class FeatureService
     // private static byte[] ignoreSlot = [0, 25 - 4, 25 - 9, 25 - 16, 25];
     // private static byte[] levelByProbability = [0, 3, 3, 2, 0];
 
-    private void Spin(FeatureStorage fs, Random random)
+    private void Spin(FeatureStorage fs)
     {
         if (fs.GemCount > 0)
         {
-            symbolCollect.CollectGemScreenArea(fs, shouldLog: false);
+            symbolCollect.ForceRemoveGem(fs);
+            fs.ClearSymbolInScreenArea();
         }
 
         while (fs.UseSpinCount())
         {
-            // 심볼 생성
-            symbol.CreateWithMummyArea(fs, random, isRespin: false);
-            symbol.CreateWithoutMummyArea(fs, random);
+            (int gemCount, int coinCount) = symbol.CreateSymbol(fs);
 
-            // 머미 영역 심볼 획득
-            var hasRedCoin = symbolCollect.CollectCoinInMummyArea(fs, isRespin: false);
-            if (hasRedCoin)
+            if (gemCount >0)
             {
-                Respin(fs, random);
+                symbolCollect.RemoveGem(fs);
             }
 
-            symbolCollect.CollectGemScreenArea(fs);
+            if (coinCount > 0)
+            {
+                symbolCollect.RemoveCoin(fs);
+            }
+
+            // 심볼 생성
+            //symbol.CreateWithMummyArea(fs, random, isRespin: false);
+            //symbol.CreateGem(fs, random);
+
+            // 머미 영역 심볼 획득
+            //var hasRedCoin = symbolCollect.CollectCoinInMummyArea(fs, isRespin: false);
+            //if (hasRedCoin)
+            //{
+            //    Respin(fs, random);
+            //}
+
+            //symbolCollect.CollectGem(fs);
 
             // 초기화
             fs.ClearSymbolInScreenArea();

@@ -31,4 +31,6 @@ public class SlotConst
     public const int PAYTABLE_SYMBOL = 12; // 페이테이블 타입 수 (W, M1, M2, M3, M4, M5, L1, L2, L3, L4, G, M)
     public const int MAX_HITS = 6; // 최대 히트 수 (0, 1, 2, 3, 4, 5)
     public const int MAX_FEATURE_LEVEL = 4; // (1, 2, 3, 4)
+
+    public static int SCREEN_AREA = FEATURE_ROWS * FEATURE_COLS;
 }

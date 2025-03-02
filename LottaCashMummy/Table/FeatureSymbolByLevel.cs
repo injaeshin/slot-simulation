@@ -2,7 +2,7 @@ using LottaCashMummy.Common;
 using System.Runtime.CompilerServices;
 
 namespace LottaCashMummy.Table;
-public class FeatureSymbolSelect(FeatureSymbolType symbol, int weight)
+public class FeatureSymbolBonusSpin(FeatureSymbolType symbol, int weight)
 {
     public FeatureSymbolType Symbol { get; set; } = symbol;
     public int Weight { get; set; } = weight;
@@ -14,22 +14,86 @@ public class FeatureSymbolSplitSelect(int value, int weight)
     public int Weight { get; set; } = weight;
 }
 
-public class FeatureSymbolValue(double value, int weight, FeatureBonusValueType bonusType)
+public class FeatureSymbolValue(FeatureBonusValueType bonusType, double value)
 {
-    public double Value { get; set; } = value;
-    public int Weight { get; set; } = weight;
     public FeatureBonusValueType BonusType { get; set; } = bonusType;
+    public double Value { get; set; } = value;
 }
 
+public class FeatureSymbolByLevel_Renew
+{
+    private FeatureSymbolType[] ScreenAreaSymbols { get; set; } = [];
+    private int ScreenAreaSymbolsTotalWeight { get; set; }
+
+    private FeatureSymbolType[] MummyAreaSymbols { get; set; } = [];
+    private int MummyAreaSymbolsTotalWeight { get; set; }
+
+    private int[] SplitValues { get; set; } = [];
+    private int SplitValuesTotalWeight { get; set; }
+
+    private FeatureSymbolValue[][] SymbolValues { get; set; } = [];
+    private int[] SymbolValuesTotalWeights { get; set; } = [];
+
+    public FeatureSymbolByLevel_Renew(GameDataLoader kv, int level)
+    {
+        if (!SymbolModelParser.SymbolLevelKeys.TryGetValue(level, out var symbolLevelKey))
+        {
+            throw new Exception($"Invalid level: {level}");
+        }
+
+        var (screenAreaSymbols, screenAreaSymbolsTotalWeight) = SymbolModelParser.ReadSymbolWeights(kv, symbolLevelKey, SymbolModelParser.SymbolSelectKeys[0]);
+        var (mummyAreaSymbols, mummyAreaSymbolsTotalWeight) = SymbolModelParser.ReadSymbolWeights(kv, symbolLevelKey, SymbolModelParser.SymbolSelectKeys[1]);
+        var (symbolSplitSelect, symbolSplitSelectTotalWeight) = SymbolModelParser.ReadSymbolSplitSelect(kv, symbolLevelKey, SymbolModelParser.SymbolSelectKeys[2]);
+        var (symbolValues, symbolValuesTotalWeights) = SymbolModelParser.ReadSymbolValues(kv, symbolLevelKey);
+
+        ScreenAreaSymbols = screenAreaSymbols;
+        ScreenAreaSymbolsTotalWeight = screenAreaSymbolsTotalWeight;
+        MummyAreaSymbols = mummyAreaSymbols;
+        MummyAreaSymbolsTotalWeight = mummyAreaSymbolsTotalWeight;
+        SplitValues = symbolSplitSelect;
+        SplitValuesTotalWeight = symbolSplitSelectTotalWeight;
+        SymbolValues = symbolValues;
+        SymbolValuesTotalWeights = symbolValuesTotalWeights;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public FeatureSymbolType GetRollSymbolInScreenArea(Random random)
+    {
+        return ScreenAreaSymbols[random.Next(ScreenAreaSymbolsTotalWeight)];
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public FeatureSymbolType GetRollSymbolInMummyArea(Random random)
+    {
+        return MummyAreaSymbols[random.Next(MummyAreaSymbolsTotalWeight)];
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int GetRollSplitSymbolCount(Random random)
+    {
+        return SplitValues[random.Next(SplitValuesTotalWeight)];
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public FeatureSymbolValue GetRollSymbolValues(Random random, FeatureBonusCombiType combiType)
+    {
+        var combiIdx = BonusTypeConverter.GetCombiTypeIndex(combiType);
+        var totalWeight = SymbolValuesTotalWeights[combiIdx];
+        var index = random.Next(totalWeight);
+        return SymbolValues[combiIdx][index];
+    }
+}
+
+/*
 public class FeatureSymbolByLevel
 {
     private const int COMBI_TYPE_COUNT = 11; // FeatureBonusCombiType의 실제 사용되는 타입 수
     private const int MAX_BONUS_TYPES = 11;
 
     public int Level { get; set; }
-    public FeatureSymbolSelect[] SymbolSelectWithGem { get; set; } = Array.Empty<FeatureSymbolSelect>();
+    public FeatureSymbolBonusSpin[] SymbolSelectWithGem { get; set; } = Array.Empty<FeatureSymbolBonusSpin>();
     public int SymbolSelectWithGemTotalWeight { get; set; }
-    public FeatureSymbolSelect[] SymbolSelectNoGem { get; set; } = Array.Empty<FeatureSymbolSelect>();
+    public FeatureSymbolBonusSpin[] SymbolSelectNoGem { get; set; } = Array.Empty<FeatureSymbolBonusSpin>();
     public int SymbolSelectNoGemTotalWeight { get; set; }
     public FeatureSymbolSplitSelect[] SymbolSplitSelect { get; set; } = Array.Empty<FeatureSymbolSplitSelect>();
     public int SymbolSplitSelectTotalWeight { get; set; }
@@ -88,7 +152,7 @@ public class FeatureSymbolByLevel
 
             var totalWeight = symbolValueTotalWeights[index];
             expandedValues[index] = new FeatureSymbolValue[totalWeight];
-            
+
             int currentIndex = 0;
             for (int i = 0; i < values.Length; i++)
             {
@@ -123,7 +187,7 @@ public class FeatureSymbolByLevel
         int currentIndex = 0;
         for (int i = 0; i < SymbolSelectWithGem.Length; i++)
         {
-            var weight = i == 0 ? SymbolSelectWithGem[i].Weight 
+            var weight = i == 0 ? SymbolSelectWithGem[i].Weight
                 : SymbolSelectWithGem[i].Weight - SymbolSelectWithGem[i - 1].Weight;
             for (int j = 0; j < weight; j++)
             {
@@ -135,7 +199,7 @@ public class FeatureSymbolByLevel
         currentIndex = 0;
         for (int i = 0; i < SymbolSelectNoGem.Length; i++)
         {
-            var weight = i == 0 ? SymbolSelectNoGem[i].Weight 
+            var weight = i == 0 ? SymbolSelectNoGem[i].Weight
                 : SymbolSelectNoGem[i].Weight - SymbolSelectNoGem[i - 1].Weight;
             for (int j = 0; j < weight; j++)
             {
@@ -147,7 +211,7 @@ public class FeatureSymbolByLevel
         currentIndex = 0;
         for (int i = 0; i < SymbolSplitSelect.Length; i++)
         {
-            var weight = i == 0 ? SymbolSplitSelect[i].Weight 
+            var weight = i == 0 ? SymbolSplitSelect[i].Weight
                 : SymbolSplitSelect[i].Weight - SymbolSplitSelect[i - 1].Weight;
             for (int j = 0; j < weight; j++)
             {
@@ -174,3 +238,4 @@ public class FeatureSymbolByLevel
         return expandedSymbolSplitSelect[random.Next(expandedSymbolSplitSelect.Length)];
     }
 }
+*/

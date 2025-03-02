@@ -48,10 +48,9 @@ public enum FeatureSymbolType : byte
 public enum FeatureBonusValueType : byte
 {
     None = 0,
-    Jackpot = 1,
+    Pay = 1,
     Spin = 2,
     RedCoin = 3,
-    Coin = 4,
     Max,
 }
 

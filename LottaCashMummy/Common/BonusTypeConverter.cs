@@ -21,6 +21,46 @@ public static class BonusTypeConverter
         return CombiTypeOrder[bonusType];
     }
 
+    public static FeatureBonusCombiType StringToCombiType(string type)
+    {
+        return type switch
+        {
+            "CollectWithRedCoin" => FeatureBonusCombiType.CollectWithRedCoin,
+            "CollectNoRedCoin" => FeatureBonusCombiType.CollectNoRedCoin,
+            "Spins" => FeatureBonusCombiType.Spins,
+            "Symbols" => FeatureBonusCombiType.Symbols,
+            "CollectSpinsWithRedCoin" => FeatureBonusCombiType.CollectSpinsWithRedCoin,
+            "CollectSpinsNoRedCoin" => FeatureBonusCombiType.CollectSpinsNoRedCoin,
+            "CollectSymbolsWithRedCoin" => FeatureBonusCombiType.CollectSymbolsWithRedCoin,
+            "CollectSymbolsNoRedCoin" => FeatureBonusCombiType.CollectSymbolsNoRedCoin,
+            "SpinsSymbols" => FeatureBonusCombiType.SpinsSymbols,
+            "AllFeaturesWithRedCoin" => FeatureBonusCombiType.AllFeaturesWithRedCoin,
+            "AllFeaturesNoRedCoin" => FeatureBonusCombiType.AllFeaturesNoRedCoin,
+            _ => FeatureBonusCombiType.None,
+        };
+    }
+
+    public static Dictionary<FeatureBonusCombiType, int> CombiTypeToIndex = new()
+    {
+        { FeatureBonusCombiType.CollectWithRedCoin, 0 },
+        { FeatureBonusCombiType.CollectNoRedCoin, 1 },
+        { FeatureBonusCombiType.Spins, 2 },
+        { FeatureBonusCombiType.Symbols, 3 },
+        { FeatureBonusCombiType.CollectSpinsWithRedCoin, 4 },
+        { FeatureBonusCombiType.CollectSpinsNoRedCoin, 5 },
+        { FeatureBonusCombiType.CollectSymbolsWithRedCoin, 6 },
+        { FeatureBonusCombiType.CollectSymbolsNoRedCoin, 7 },
+        { FeatureBonusCombiType.SpinsSymbols, 8 },
+        { FeatureBonusCombiType.AllFeaturesWithRedCoin, 9 },
+        { FeatureBonusCombiType.AllFeaturesNoRedCoin, 10 },
+    };
+
+    public static int GetCombiTypeIndex(FeatureBonusCombiType combiType)
+    {
+        return CombiTypeToIndex[combiType];
+    }
+
+
     private static readonly Dictionary<(FeatureBonusType, bool), FeatureBonusCombiType> CombiTypeMap = new()
     {
         // 단일 기능

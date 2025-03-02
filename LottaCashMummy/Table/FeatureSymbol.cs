@@ -5,52 +5,49 @@ namespace LottaCashMummy.Table;
 
 public interface IFeatureSymbol
 {
-    FeatureSymbolType GetRollSymbolSelectWithGem(int level, Random random);
-    FeatureSymbolType GetRollSymbolSelectNoGem(int level, Random random);
-    int GetRollSymbolSplitSelect(int level, Random random);
+    FeatureSymbolType GetRollSymbolInScreenArea(int level, Random random);
+    FeatureSymbolType GetRollSymbolInMummyArea(int level, Random random);
+    int GetRollSplitSymbolCount(int level, Random random);
     FeatureSymbolValue GetRollSymbolValues(int level, FeatureBonusCombiType combiType, Random random);
 }
 
 public class FeatureSymbol : IFeatureSymbol
 {
     // 레벨별 심볼 데이터를 배열로 변경 (1-based index)
-    private readonly FeatureSymbolByLevel[] symbolsByLevel;
-
-    private const int MAX_LEVEL = 4;
+    private readonly FeatureSymbolByLevel_Renew[] symbolsByLevel;
 
     public FeatureSymbol(GameDataLoader kv)
     {
-        var parser = new FeatureSymbolModelParser();
-        symbolsByLevel = new FeatureSymbolByLevel[MAX_LEVEL + 1];  // 0번 인덱스는 사용하지 않음
+        symbolsByLevel = new FeatureSymbolByLevel_Renew[SymbolModelParser.SymbolLevelKeys.Count];
 
-        foreach (var (lv, _) in FeatureSymbolModelParser.SymbolLevelKeys)
+        foreach (var (lv, _) in SymbolModelParser.SymbolLevelKeys)
         {
-            symbolsByLevel[lv] = parser.Read(kv, lv);
+            symbolsByLevel[lv - 1] = new FeatureSymbolByLevel_Renew(kv, lv);
         }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private FeatureSymbolByLevel GetSymbols(int level)
+    private FeatureSymbolByLevel_Renew GetSymbols(int level)
     {
-        return symbolsByLevel[level];
+        return symbolsByLevel[level - 1];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public FeatureSymbolType GetRollSymbolSelectWithGem(int level, Random random)
+    public FeatureSymbolType GetRollSymbolInScreenArea(int level, Random random)
     {
-        return GetSymbols(level).GetRollSymbolSelectWithGem(random);
+        return GetSymbols(level).GetRollSymbolInScreenArea(random);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public FeatureSymbolType GetRollSymbolSelectNoGem(int level, Random random)
+    public FeatureSymbolType GetRollSymbolInMummyArea(int level, Random random)
     {
-        return GetSymbols(level).GetRollSymbolSelectNoGem(random);
+        return GetSymbols(level).GetRollSymbolInMummyArea(random);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int GetRollSymbolSplitSelect(int level, Random random)
+    public int GetRollSplitSymbolCount(int level, Random random)
     {
-        return GetSymbols(level).GetRollSplitSymbolSelect(random);
+        return GetSymbols(level).GetRollSplitSymbolCount(random);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

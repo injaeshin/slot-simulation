@@ -5,6 +5,13 @@ namespace LottaCashMummy.Buffer;
 
 public class FeatureStorage
 {
+    private const int SEED = 0x10203040;
+    private readonly Random symbolRng = new Random(SEED);
+    public Random SymbolRng => symbolRng;
+    private readonly Random valueRng = new Random(SEED);
+    public Random ValueRng => valueRng;
+
+
     private readonly SlotStats spinStats;
 
     private readonly MummyState mummy;
@@ -183,7 +190,7 @@ public class FeatureStorage
 
     public SymbolPair GetSymbol(int index) => screenArea[index];
 
-    public bool IsActiveMummyArea(int index) => mummyArea[index] > 0;
+    public bool IsActiveMummyArea(int index) => mummyArea[index] == 1;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int GetMummyAreaCount() => MummyAreaCount;
@@ -307,5 +314,49 @@ public class FeatureStorage
     public void TestAddCoinValue(double value)
     {
         spinStats.AddObtainCoinValue(featureBonusType, initGemCount, mummy.Level, value);
+    }
+    public void ObtainGem(FeatureSymbol symbol)
+    {
+        if (symbol.Type != FeatureSymbolType.Gem)
+        {
+            throw new Exception("Invalid symbol type");
+        }
+
+        ObtainGemValue(symbol);
+
+        GemCount--;
+        mummy.ObtainGem();
+        symbol.Clear();
+    }
+
+    public void ForceObtainGem(FeatureSymbol symbol)
+    {
+        //ObtainGemValue(symbol);
+        GemCount--;
+        mummy.ObtainGem();
+        symbol.Clear();
+    }    
+
+    private void ObtainGemValue(FeatureSymbol symbol)
+    {
+        spinStats.AddObtainGemValue(featureBonusType, initGemCount, mummy.Level, symbol.Value);
+    }
+
+    public void ObtainCoin(FeatureSymbol symbol)
+    {
+        if (symbol.Type != FeatureSymbolType.Coin)
+        {
+            throw new Exception("Invalid symbol type");
+        }
+
+        ObtainCoinValue(symbol);
+
+        CoinCount--;
+        symbol.Clear();
+    }
+
+    private void ObtainCoinValue(FeatureSymbol symbol)
+    {
+        spinStats.AddObtainCoinValue(featureBonusType, initGemCount, mummy.Level, symbol.Value);
     }
 }
