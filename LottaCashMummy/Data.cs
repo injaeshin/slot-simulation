@@ -25,19 +25,19 @@ public class BaseData : IBaseData
 
 public interface IFeatureData
 {
-    IFeatureMummy FeatureMummy { get; }
-    IFeatureSymbol FeatureSymbol { get; }
+    IFeatureMummy Mummy { get; }
+    IFeatureSymbol Symbol { get; }
 }
 
 public class FeatureData : IFeatureData
 {
-    public IFeatureMummy FeatureMummy { get; }
-    public IFeatureSymbol FeatureSymbol { get; }
+    public IFeatureMummy Mummy { get; }
+    public IFeatureSymbol Symbol { get; }
 
     public FeatureData(GameDataLoader kv)
     {
-        FeatureMummy = new FeatureMummy(kv);
-        FeatureSymbol = new FeatureSymbol(kv);
+        Mummy = new FeatureMummy(kv);
+        Symbol = new FeatureSymbol(kv);
     }
 }
 

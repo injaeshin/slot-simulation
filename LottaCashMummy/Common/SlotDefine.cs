@@ -40,8 +40,9 @@ public enum FeatureSymbolType : byte
 {
     None = 0,
     Coin = 1,
-    Blank = 2,
-    Gem = 3,
+    RedCoin = 2,
+    Blank = 3,
+    Gem = 4,
     Max,
 }
 
@@ -49,8 +50,12 @@ public enum FeatureBonusValueType : byte
 {
     None = 0,
     Pay = 1,
-    Spin = 2,
-    RedCoin = 3,
+    Grand = 2,
+    Mega = 3,
+    Major = 4,
+    Minor = 5,
+    Mini = 6,
+    PlusSpin = 7,
     Max,
 }
 
@@ -66,27 +71,27 @@ public enum FeatureBonusType : byte
     CollectSpinsSymbols = Collect | Spins | Symbols, // 7   3개
 }
 
-public enum FeatureBonusCombiType : byte
-{
-    None,
-    // 단일 기능
-    CollectWithRedCoin,        // Collect(+RedCoin)
-    CollectNoRedCoin,          // Collect(-RedCoin)
-    Spins,                     // Spins
-    Symbols,                   // Symbols
+// public enum FeatureBonusCombiType : byte
+// {
+//     None,
+//     // 단일 기능
+//     CollectWithRedCoin,        // Collect(+RedCoin)
+//     CollectNoRedCoin,          // Collect(-RedCoin)
+//     Spins,                     // Spins
+//     Symbols,                   // Symbols
 
-    // 2개 조합
-    CollectSpinsWithRedCoin,   // Collect+Spins(+RedCoin)
-    CollectSpinsNoRedCoin,     // Collect+Spins(-RedCoin)
-    CollectSymbolsWithRedCoin, // Collect+Symbols(+RedCoin)
-    CollectSymbolsNoRedCoin,   // Collect+Symbols(-RedCoin)
-    SpinsSymbols,              // Spins+Symbols
+//     // 2개 조합
+//     CollectSpinsWithRedCoin,   // Collect+Spins(+RedCoin)
+//     CollectSpinsNoRedCoin,     // Collect+Spins(-RedCoin)
+//     CollectSymbolsWithRedCoin, // Collect+Symbols(+RedCoin)
+//     CollectSymbolsNoRedCoin,   // Collect+Symbols(-RedCoin)
+//     SpinsSymbols,              // Spins+Symbols
 
-    // 3개 조합
-    AllFeaturesWithRedCoin,    // Collect+Spins+Symbols(+RedCoin)
-    AllFeaturesNoRedCoin,       // Collect+Spins+Symbols(-RedCoin)
-    Max
-}
+//     // 3개 조합
+//     AllFeaturesWithRedCoin,    // Collect+Spins+Symbols(+RedCoin)
+//     AllFeaturesNoRedCoin,       // Collect+Spins+Symbols(-RedCoin)
+//     Max
+// }
 
 //public enum MummyCollectBoxType : byte
 //{

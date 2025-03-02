@@ -1,5 +1,4 @@
 using LottaCashMummy.Buffer;
-using LottaCashMummy.Common;
 
 namespace LottaCashMummy.Game;
 
@@ -12,39 +11,41 @@ public class FeatureSymbolCollect
         this.mummy = mummy;
     }
 
-    public bool CollectCoinInMummyArea(FeatureStorage fs, bool isRespin)
+    public void CollectCoin(FeatureStorage fs, int splitSymbolIndex, bool isRespin, out bool hasRedCoin)
     {
+        hasRedCoin = false;
         var coinCount = fs.CoinCount;
         if (coinCount <= 0)
-            return false;
+            return;
 
-        bool hasRedCoin = false;
         var coinIndices = fs.CoinIndices;
         for (int i = 0; i < coinCount; i++)
         {
             var idx = coinIndices[i];
             var symbol = fs.GetSymbol(idx);
-            if (!symbol.HasCoin())
+            if (!symbol.HasCoin() && !symbol.HasRedCoin())
             {
                 throw new Exception("Coin not found");
             }
 
-            if (symbol.First.Type == FeatureSymbolType.Coin)
+            if (symbol.HasRedCoin())
             {
-                hasRedCoin = fs.CollectSymbolValue(idx, symbol.First, isRespin);
-                fs.CollectSymbol(idx, symbol.First, isRespin);
+                hasRedCoin = true;
             }
-            else if (symbol.Second.Type == FeatureSymbolType.Coin)
+
+            if (splitSymbolIndex == idx)
             {
-                hasRedCoin = fs.CollectSymbolValue(idx, symbol.Second, isRespin);
-                fs.CollectSymbol(idx, symbol.Second, isRespin);
+                CollectBasedOnSymbol(fs, idx, symbol.First, isRespin);
+                CollectBasedOnSymbol(fs, idx, symbol.Second, isRespin);
+            }
+            else
+            {
+                CollectBasedOnSymbol(fs, idx, symbol.First, isRespin);
             }
         }
-
-        return hasRedCoin;
     }
 
-    public void CollectGem(FeatureStorage fs, bool shouldLog = true)
+    public void CollectGem(FeatureStorage fs, int splitSymbolIndex, bool isRespin)
     {
         var gemCount = fs.GemCount;
         if (gemCount <= 0)
@@ -60,78 +61,29 @@ public class FeatureSymbolCollect
                 throw new Exception("Gem not found");
             }
 
-            if (!fs.IsActiveMummyArea(idx))
+            if (splitSymbolIndex == idx)
             {
-                //FeatureMummy.Move(fs, idx);
+                CollectBasedOnSymbol(fs, idx, symbol.First, isRespin);
+                CollectBasedOnSymbol(fs, idx, symbol.Second, isRespin);
             }
-
-            var isRespin = false;
-            if (symbol.First.Type == FeatureSymbolType.Gem)
+            else
             {
-                //fs.CollectSymbolValue(idx, symbol.First, isRespin, shouldLog);
-                fs.CollectSymbol(idx, symbol.First, isRespin, shouldLog);
+                CollectBasedOnSymbol(fs, idx, symbol.First, isRespin);
             }
-            else if (symbol.Second.Type == FeatureSymbolType.Gem)
-            {
-                //fs.CollectSymbolValue(idx, symbol.Second, isRespin, shouldLog);
-                fs.CollectSymbol(idx, symbol.Second, isRespin, shouldLog);
-            }
-
-            //mummy.LevelUp(fs);
         }
+
+        mummy.LevelUp(fs);
     }
 
-    public void RemoveCoin(FeatureStorage fs)
+    private static void CollectBasedOnSymbol(FeatureStorage fs, int idx, FeatureSymbol symbol, bool isRespin)
     {
-        var coinCount = fs.CoinCount;
-        if (coinCount <= 0)
-            throw new Exception("Coin not found");
-
-        var coinIndices = fs.CoinIndices;
-        for (int i = 0; i < coinCount; i++)
+        if (isRespin)
         {
-            var idx = coinIndices[i];
-            var symbol = fs.GetSymbol(idx);
-            if (!symbol.HasCoin())
-                throw new Exception("Coin not found");
-
-            fs.ObtainCoin(symbol.First);
+            fs.CollectSymbolRespin(idx, symbol);
         }
-    }
-
-    public void ForceRemoveGem(FeatureStorage fs)
-    {
-        var gemCount = fs.GemCount;
-        if (gemCount <= 0)
-            throw new Exception("Gem not found");
-
-        var gemIndices = fs.GemIndices;
-        for (int i = 0; i < gemCount; i++)
+        else
         {
-            var idx = gemIndices[i];
-            var symbol = fs.GetSymbol(idx);
-            if (!symbol.HasGem())
-                throw new Exception("Gem not found");
-
-            fs.ForceObtainGem(symbol.First);
-        }
-    }
-
-    public void RemoveGem(FeatureStorage fs)
-    {
-        var gemCount = fs.GemCount;
-        if (gemCount <= 0)
-            throw new Exception("Gem not found");
-
-        var gemIndices = fs.GemIndices;
-        for (int i = 0; i < gemCount; i++)
-        {
-            var idx = gemIndices[i];
-            var symbol = fs.GetSymbol(idx);
-            if (!symbol.HasGem())
-                throw new Exception("Gem not found");
-            
-            fs.ObtainGem(symbol.First);
+            fs.CollectSymbol(idx, symbol);
         }
     }
 }

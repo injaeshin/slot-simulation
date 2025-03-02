@@ -8,14 +8,14 @@ public class BaseStorage
 {
     private readonly IDbRepository dbRepository;
     private static readonly byte[,] symbolIndexLookup;
-    private readonly SlotStats spinStats;
+    private readonly BaseStats baseStats;
 
     private readonly byte[] symbols;        // 심볼 타입
     private readonly byte[] jackpots;       // 잭팟 정보
     private readonly byte[] attributes;     // Gem 속성
     private readonly double[] values;       // Gem 값
 
-    private readonly Symbol[] winGems;
+    private readonly BaseSymbol[] winGems;
     private readonly byte[] gemIndices;
     private readonly byte[] normalIndices;
     private readonly byte[] mummyPosition;
@@ -24,7 +24,7 @@ public class BaseStorage
     private byte gemSymbolCount;
     private byte winGemCount;
     private byte mummyCount;
-    private byte bonusType;
+    private FeatureBonusType bonusType;
 
     static BaseStorage()
     {
@@ -38,9 +38,9 @@ public class BaseStorage
         }
     }
 
-    public BaseStorage(SlotStats spinStats, IDbRepository dbRepository)
+    public BaseStorage(BaseStats baseStats, IDbRepository dbRepository)
     {
-        this.spinStats = spinStats;
+        this.baseStats = baseStats;
         this.dbRepository = dbRepository;
 
         symbols = new byte[SlotConst.TOTAL_POSITIONS];
@@ -51,13 +51,11 @@ public class BaseStorage
         attributes = new byte[SlotConst.TOTAL_POSITIONS];
         values = new double[SlotConst.TOTAL_POSITIONS];
         
-        winGems = new Symbol[SlotConst.MAX_WIN_GEM_SYMBOL];
+        winGems = new BaseSymbol[SlotConst.MAX_WIN_GEM_SYMBOL];
         for (int i = 0; i < SlotConst.MAX_WIN_GEM_SYMBOL; i++)
         {
-            winGems[i] = new Symbol();
+            winGems[i] = new BaseSymbol();
         }
-
-        Clear();
     }
     public void Clear()
     {
@@ -85,7 +83,7 @@ public class BaseStorage
     public int NormalCount => normalSymbolCount;
     public int GemCount => gemSymbolCount;
     public bool HasMummySymbol => mummyCount > 0;
-    public byte FeatureBonusType => bonusType;
+    public FeatureBonusType FeatureBonusType => bonusType;
     public int WinGemCount => winGemCount;
 
     // Getters for external access
@@ -96,8 +94,8 @@ public class BaseStorage
     public byte GetJackpot(byte index) => jackpots[index];
     public byte GetNormalIndex(byte index) => normalIndices[index];
     public byte GetGemIndex(byte index) => gemIndices[index];
-    public void SetFeatureBonusType(byte type) => bonusType = type;
-    public Symbol GetWinGemSymbol(byte i) => winGems[i];
+    public void SetFeatureBonusType(byte type) => bonusType = (FeatureBonusType)type;
+    public BaseSymbol GetWinGemSymbol(byte i) => winGems[i];
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -185,13 +183,13 @@ public class BaseStorage
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddSpinCount()
     {
-        spinStats.AddBaseSpinCount();
+        baseStats.AddSpinCount();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddWinAmount(byte symbol, int hits, int amount)
     {
-        spinStats.AddBasePayWin(symbol, hits, amount);
+        baseStats.AddPayWin(symbol, hits, amount);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

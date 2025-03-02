@@ -8,26 +8,27 @@ public interface IFeatureSymbol
     FeatureSymbolType GetRollSymbolInScreenArea(int level, Random random);
     FeatureSymbolType GetRollSymbolInMummyArea(int level, Random random);
     int GetRollSplitSymbolCount(int level, Random random);
-    FeatureSymbolValue GetRollSymbolValues(int level, FeatureBonusCombiType combiType, Random random);
+    int GetRollRedCoinSymbolCount(int level, Random random);
+    FeatureSymbolValue GetRollSymbolValues(int level, FeatureBonusType bonusType, Random random);
 }
 
 public class FeatureSymbol : IFeatureSymbol
 {
     // 레벨별 심볼 데이터를 배열로 변경 (1-based index)
-    private readonly FeatureSymbolByLevel_Renew[] symbolsByLevel;
+    private readonly FeatureSymbolByLevel[] symbolsByLevel;
 
     public FeatureSymbol(GameDataLoader kv)
     {
-        symbolsByLevel = new FeatureSymbolByLevel_Renew[SymbolModelParser.SymbolLevelKeys.Count];
+        symbolsByLevel = new FeatureSymbolByLevel[SymbolModelParser.SymbolLevelKeys.Count];
 
         foreach (var (lv, _) in SymbolModelParser.SymbolLevelKeys)
         {
-            symbolsByLevel[lv - 1] = new FeatureSymbolByLevel_Renew(kv, lv);
+            symbolsByLevel[lv - 1] = new FeatureSymbolByLevel(kv, lv);
         }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private FeatureSymbolByLevel_Renew GetSymbols(int level)
+    private FeatureSymbolByLevel GetSymbols(int level)
     {
         return symbolsByLevel[level - 1];
     }
@@ -51,8 +52,14 @@ public class FeatureSymbol : IFeatureSymbol
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public FeatureSymbolValue GetRollSymbolValues(int level, FeatureBonusCombiType combiType, Random random)
+    public int GetRollRedCoinSymbolCount(int level, Random random)
     {
-        return GetSymbols(level).GetRollSymbolValues(random, combiType);
+        return GetSymbols(level).GetRollRedCoinSymbolCount(random);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public FeatureSymbolValue GetRollSymbolValues(int level, FeatureBonusType bonusType, Random random)
+    {
+        return GetSymbols(level).GetRollSymbolValues(random, bonusType);
     }
 }

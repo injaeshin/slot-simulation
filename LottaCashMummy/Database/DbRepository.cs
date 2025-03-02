@@ -274,10 +274,10 @@ public class DbRepository : IDbRepository, IDisposable
         AddFeatureSpinCount(stats.SpinCount);
         AddFeatureGemCount(stats.GemCount);
         AddFeatureGemValue(stats.GemValue);
-        AddFeatureCoinWithRedCount(stats.CoinWithRedCount);
-        AddFeatureCoinWithRedValue(stats.CoinWithRedValue);
-        AddFeatureCoinNoRedCount(stats.CoinNoRedCount);
-        AddFeatureCoinNoRedValue(stats.CoinNoRedValue);
+        // AddFeatureCoinWithRedCount(stats.CoinWithRedCount);
+        // AddFeatureCoinWithRedValue(stats.CoinWithRedValue);
+        // AddFeatureCoinNoRedCount(stats.CoinNoRedCount);
+        // AddFeatureCoinNoRedValue(stats.CoinNoRedValue);
     }
 
     private void AddFeatureLevel(Dictionary<(FeatureBonusType, int, int), int> levelCount)

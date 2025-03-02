@@ -20,7 +20,7 @@ public class FeatureSymbolValue(FeatureBonusValueType bonusType, double value)
     public double Value { get; set; } = value;
 }
 
-public class FeatureSymbolByLevel_Renew
+public class FeatureSymbolByLevel
 {
     private FeatureSymbolType[] ScreenAreaSymbols { get; set; } = [];
     private int ScreenAreaSymbolsTotalWeight { get; set; }
@@ -28,13 +28,16 @@ public class FeatureSymbolByLevel_Renew
     private FeatureSymbolType[] MummyAreaSymbols { get; set; } = [];
     private int MummyAreaSymbolsTotalWeight { get; set; }
 
-    private int[] SplitValues { get; set; } = [];
-    private int SplitValuesTotalWeight { get; set; }
+    private int[] SplitSymbolValues { get; set; } = [];
+    private int SplitSymbolValuesTotalWeight { get; set; }
+
+    private int[] RedCoinSymbolValues { get; set; } = [];
+    private int RedCoinSymbolValuesTotalWeight { get; set; }
 
     private FeatureSymbolValue[][] SymbolValues { get; set; } = [];
     private int[] SymbolValuesTotalWeights { get; set; } = [];
 
-    public FeatureSymbolByLevel_Renew(GameDataLoader kv, int level)
+    public FeatureSymbolByLevel(GameDataLoader kv, int level)
     {
         if (!SymbolModelParser.SymbolLevelKeys.TryGetValue(level, out var symbolLevelKey))
         {
@@ -43,15 +46,21 @@ public class FeatureSymbolByLevel_Renew
 
         var (screenAreaSymbols, screenAreaSymbolsTotalWeight) = SymbolModelParser.ReadSymbolWeights(kv, symbolLevelKey, SymbolModelParser.SymbolSelectKeys[0]);
         var (mummyAreaSymbols, mummyAreaSymbolsTotalWeight) = SymbolModelParser.ReadSymbolWeights(kv, symbolLevelKey, SymbolModelParser.SymbolSelectKeys[1]);
-        var (symbolSplitSelect, symbolSplitSelectTotalWeight) = SymbolModelParser.ReadSymbolSplitSelect(kv, symbolLevelKey, SymbolModelParser.SymbolSelectKeys[2]);
+        var (splitSymbolSelect, splitSymbolSelectTotalWeight) = SymbolModelParser.ReadSymbolBonusSelect(kv, symbolLevelKey, SymbolModelParser.SymbolSelectKeys[2]);
+        var (redcoinSymbolSelect, redcoinSymbolSelectTotalWeight) = SymbolModelParser.ReadSymbolBonusSelect(kv, symbolLevelKey, SymbolModelParser.SymbolSelectKeys[3]);
+
+
         var (symbolValues, symbolValuesTotalWeights) = SymbolModelParser.ReadSymbolValues(kv, symbolLevelKey);
 
         ScreenAreaSymbols = screenAreaSymbols;
         ScreenAreaSymbolsTotalWeight = screenAreaSymbolsTotalWeight;
         MummyAreaSymbols = mummyAreaSymbols;
         MummyAreaSymbolsTotalWeight = mummyAreaSymbolsTotalWeight;
-        SplitValues = symbolSplitSelect;
-        SplitValuesTotalWeight = symbolSplitSelectTotalWeight;
+        SplitSymbolValues = splitSymbolSelect;
+        SplitSymbolValuesTotalWeight = splitSymbolSelectTotalWeight;
+        RedCoinSymbolValues = redcoinSymbolSelect;
+        RedCoinSymbolValuesTotalWeight = redcoinSymbolSelectTotalWeight;
+
         SymbolValues = symbolValues;
         SymbolValuesTotalWeights = symbolValuesTotalWeights;
     }
@@ -71,16 +80,22 @@ public class FeatureSymbolByLevel_Renew
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int GetRollSplitSymbolCount(Random random)
     {
-        return SplitValues[random.Next(SplitValuesTotalWeight)];
+        return SplitSymbolValues[random.Next(SplitSymbolValuesTotalWeight)];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public FeatureSymbolValue GetRollSymbolValues(Random random, FeatureBonusCombiType combiType)
+    public int GetRollRedCoinSymbolCount(Random random)
     {
-        var combiIdx = BonusTypeConverter.GetCombiTypeIndex(combiType);
-        var totalWeight = SymbolValuesTotalWeights[combiIdx];
+        return RedCoinSymbolValues[random.Next(RedCoinSymbolValuesTotalWeight)];
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public FeatureSymbolValue GetRollSymbolValues(Random random, FeatureBonusType bonusType)
+    {
+        var typeIdx = BonusTypeConverter.GetBonusTypeOrder(bonusType) - 1;
+        var totalWeight = SymbolValuesTotalWeights[typeIdx];
         var index = random.Next(totalWeight);
-        return SymbolValues[combiIdx][index];
+        return SymbolValues[typeIdx][index];
     }
 }
 

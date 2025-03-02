@@ -14,20 +14,24 @@ public class FeatureSetup
         this.mummy = mummy;
     }
 
-    public void Init(BaseStorage bs, FeatureStorage fs, Random random)
+    public void Init(ThreadLocalStorage tls)
     {
+        var bs = tls.BaseStorage;
+        var fs = tls.FeatureStorage;
+        var random = tls.Random;
+
         InitializeFeatureGame(fs, bs.FeatureBonusType);
-        CopyGemsFromBaseGame(fs, bs);
+        AddGemFromBaseGame(fs, bs);
         SetupInitialMummy(bs, fs, random);
     }
 
-    private void InitializeFeatureGame(FeatureStorage featureStorage, byte bonusType)
+    private void InitializeFeatureGame(FeatureStorage featureStorage, FeatureBonusType bonusType)
     {
         featureStorage.Clear();
         featureStorage.SetBonusType(bonusType);
     }
 
-    private void CopyGemsFromBaseGame(FeatureStorage featureStorage, BaseStorage baseStorage)
+    private void AddGemFromBaseGame(FeatureStorage featureStorage, BaseStorage baseStorage)
     {
         if (baseStorage.WinGemCount <= 0)
         {
@@ -43,7 +47,7 @@ public class FeatureSetup
                 throw new Exception("Win gem symbol is not set");
             }
 
-            featureStorage.CopyGemSymbol(symbol.Index, FeatureSymbolType.Gem, FeatureBonusValueType.None, symbol.Value);
+            featureStorage.CollectGemFromBaseGame(symbol.Value);
         }
 
         featureStorage.SetInitGemCount(winGemCount);

@@ -25,8 +25,8 @@ public class ThreadLocalStorage
     {
         random = new Random(SEED);
         spinStats = new SlotStats();
-        baseStorage = new BaseStorage(spinStats, dbRepository);
-        featureStorage = new FeatureStorage(spinStats);
+        baseStorage = new BaseStorage(spinStats.BaseStats, dbRepository);
+        featureStorage = new FeatureStorage(spinStats.FeatureStats);
     }
 
     public void Clear()
@@ -34,6 +34,7 @@ public class ThreadLocalStorage
         baseStorage.Clear();
         featureStorage.Clear();
     }
+
 
     // [MethodImpl(MethodImplOptions.AggressiveInlining)]
     // public double GetBaseWinAmount() => SpinStats.GetBaseWinAmount();

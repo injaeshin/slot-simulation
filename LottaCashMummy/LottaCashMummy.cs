@@ -37,7 +37,7 @@ public class LottaCashMummy
 
     public void Run(long totalSpins, int threadCount = 0)
     {
-        const int BATCH_SIZE = 120000;
+        const int BATCH_SIZE = 5000;
 
         //var config = new SimulationStats();
         var totalBatches = (int)Math.Ceiling(totalSpins / (double)BATCH_SIZE);
@@ -119,7 +119,7 @@ public class LottaCashMummy
         Console.WriteLine(header);
         Console.WriteLine(new string('-', 150));
 
-        foreach (FeatureBonusType type in BonusTypeConverter.CombiTypeOrder.Keys)
+        foreach (FeatureBonusType type in BonusTypeConverter.BonusTypeOrder.Keys)
         {
             for (int gem = 1; gem <= 5; gem++)
             {

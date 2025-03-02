@@ -14,7 +14,7 @@ namespace LottaCashMummy.Game
 
         public void Init(FeatureStorage fs, int mummyPosition)
         {
-            if (!featureData.FeatureMummy.TryGetMummyLevel(1, out var mummyLevel))
+            if (!featureData.Mummy.TryGetMummyLevel(1, out var mummyLevel))
             {
                 throw new Exception("Mummy level not found");
             }
@@ -30,7 +30,7 @@ namespace LottaCashMummy.Game
                 return;
             }
 
-            if (!featureData.FeatureMummy.TryGetMummyLevel(fs.Mummy.Level + 1, out var nextLevel) || nextLevel == null)
+            if (!featureData.Mummy.TryGetMummyLevel(fs.Mummy.Level + 1, out var nextLevel) || nextLevel == null)
             {
                 throw new Exception("Mummy level not found");
             }

@@ -3,14 +3,14 @@ using LottaCashMummy.Common;
 
 namespace LottaCashMummy.Buffer;
 
-public class Symbol
+public class BaseSymbol
 {
     public byte Index { get; set; }
     public double Value { get; set; }
     public SymbolType Type { get; set; }
     public GemBonusType BonusType { get; set; }
 
-    public Symbol() : base()
+    public BaseSymbol() : base()
     {
         Index = 0;
         Value = 0;
@@ -79,12 +79,6 @@ public class SymbolPair
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool HasGem()
-    {
-        return first.Type == FeatureSymbolType.Gem || second.Type == FeatureSymbolType.Gem;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddSymbol(FeatureSymbolType type, FeatureBonusValueType bonusType, double value)
     {
         var target = first.Type == FeatureSymbolType.None ? first : second;
@@ -94,7 +88,29 @@ public class SymbolPair
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasCoin()
     {
-        return first.Type == FeatureSymbolType.Coin || second.Type == FeatureSymbolType.Coin;
+        if (first.Type == FeatureSymbolType.Coin || first.Type == FeatureSymbolType.Coin)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool HasRedCoin()
+    {
+        if (first.Type == FeatureSymbolType.RedCoin || second.Type == FeatureSymbolType.RedCoin)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool HasGem()
+    {
+        return first.Type == FeatureSymbolType.Gem || second.Type == FeatureSymbolType.Gem;
     }
 
     public (FeatureSymbol, FeatureSymbol) GetSymbols()

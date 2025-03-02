@@ -13,21 +13,58 @@ public class FeatureStats
 
     private readonly Dictionary<(FeatureBonusType, int, int), int> gemCount = new();
     public Dictionary<(FeatureBonusType, int, int), int> GemCount => gemCount;
-
     private readonly Dictionary<(FeatureBonusType, int, int), double> gemValue = new();
     public Dictionary<(FeatureBonusType, int, int), double> GemValue => gemValue;
+    private readonly Dictionary<(FeatureBonusType, int, int), int> coinCount = new();
+    public Dictionary<(FeatureBonusType, int, int), int> CoinCount => coinCount;
+    private readonly Dictionary<(FeatureBonusType, int, int), double> coinValue = new();
+    public Dictionary<(FeatureBonusType, int, int), double> CoinValue => coinValue;
+    private readonly Dictionary<(FeatureBonusType, int, int), int> splitCount = new();
+    public Dictionary<(FeatureBonusType, int, int), int> SplitCount => splitCount;
 
-    private readonly Dictionary<(FeatureBonusType, int, int), int> coinWithRedCount = new();
-    public Dictionary<(FeatureBonusType, int, int), int> CoinWithRedCount => coinWithRedCount;
+    private readonly Dictionary<(FeatureBonusType, int, int), int> spinAdd1SpinCount = new();
+    public Dictionary<(FeatureBonusType, int, int), int> SpinAdd1SpinCount => spinAdd1SpinCount;
 
-    private readonly Dictionary<(FeatureBonusType, int, int), double> coinWithRedValue = new();
-    public Dictionary<(FeatureBonusType, int, int), double> CoinWithRedValue => coinWithRedValue;
+    #region respin
+    private readonly Dictionary<(FeatureBonusType, int, int), int> redcoinCount = new();
+    public Dictionary<(FeatureBonusType, int, int), int> RedCoinCount => redcoinCount;
+    private readonly Dictionary<(FeatureBonusType, int, int), int> respinCount = new();
+    public Dictionary<(FeatureBonusType, int, int), int> RespinCount => respinCount;
+    private readonly Dictionary<(FeatureBonusType, int, int), int> respinCoinCount = new();
+    public Dictionary<(FeatureBonusType, int, int), int> RespinCoinCount => respinCoinCount;
+    private readonly Dictionary<(FeatureBonusType, int, int), double> respinCoinValue = new();
+    public Dictionary<(FeatureBonusType, int, int), double> RespinCoinValue => respinCoinValue;
 
-    private readonly Dictionary<(FeatureBonusType, int, int), int> coinNoRedCount = new();
-    public Dictionary<(FeatureBonusType, int, int), int> CoinNoRedCount => coinNoRedCount;
 
-    private readonly Dictionary<(FeatureBonusType, int, int), double> coinNoRedValue = new();
-    public Dictionary<(FeatureBonusType, int, int), double> CoinNoRedValue => coinNoRedValue;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void AddRedCoinCount(FeatureBonusType bonusType, int initGemCount, int level)
+    {
+        var key = (bonusType, initGemCount, level);
+        this.redcoinCount[key] = this.redcoinCount.GetValueOrDefault(key, 0) + 1;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void AddRespinCount(FeatureBonusType bonusType, int initGemCount, int level)
+    {
+        var key = (bonusType, initGemCount, level);
+        this.respinCount[key] = this.respinCount.GetValueOrDefault(key, 0) + 1;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void AddRespinCoinCount(FeatureBonusType bonusType, int initGemCount, int level)
+    {
+        var key = (bonusType, initGemCount, level);
+        this.respinCoinCount[key] = this.respinCoinCount.GetValueOrDefault(key, 0) + 1;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void AddRespinCoinValue(FeatureBonusType bonusType, int initGemCount, int level, double coinValue)
+    {
+        var key = (bonusType, initGemCount, level);
+        this.respinCoinValue[key] = this.respinCoinValue.GetValueOrDefault(key, 0) + coinValue;
+    }
+
+    #endregion
 
     public void Reset()
     {
@@ -37,10 +74,15 @@ public class FeatureStats
             spinCount[key] = 0;
             gemCount[key] = 0;
             gemValue[key] = 0;
-            coinWithRedCount[key] = 0;
-            coinWithRedValue[key] = 0;
-            coinNoRedCount[key] = 0;
-            coinNoRedValue[key] = 0;
+            coinCount[key] = 0;
+            coinValue[key] = 0;
+            splitCount[key] = 0;
+            spinAdd1SpinCount[key] = 0;
+
+            redcoinCount[key] = 0;
+            respinCount[key] = 0;
+            respinCoinCount[key] = 0;
+            respinCoinValue[key] = 0;
         }
     }
 
@@ -54,12 +96,24 @@ public class FeatureStats
             spinCount[key] = 0;
             gemCount[key] = 0;
             gemValue[key] = 0;
-            coinWithRedCount[key] = 0;
-            coinWithRedValue[key] = 0;
-            coinNoRedCount[key] = 0;
-            coinNoRedValue[key] = 0;
+            coinCount[key] = 0;
+            coinValue[key] = 0;
+            splitCount[key] = 0;
+            spinAdd1SpinCount[key] = 0;
+
+            redcoinCount[key] = 0;
+            respinCount[key] = 0;
+            respinCoinCount[key] = 0;
+            respinCoinValue[key] = 0;
         }
 
+        levelCount[key]++;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void AddLevelUp(FeatureBonusType bonusType, int initGemCount, int level)
+    {
+        var key = (bonusType, initGemCount, level);
         levelCount[key]++;
     }
 
@@ -85,30 +139,30 @@ public class FeatureStats
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void AddCoinWithRedCount(FeatureBonusType bonusType, int initGemCount, int level)
+    public void AddCoinCount(FeatureBonusType bonusType, int initGemCount, int level)
     {
         var key = (bonusType, initGemCount, level);
-        this.coinWithRedCount[key] = this.coinWithRedCount.GetValueOrDefault(key, 0) + 1;
+        this.coinCount[key] = this.coinCount.GetValueOrDefault(key, 0) + 1;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void AddCoinWithRedValue(FeatureBonusType bonusType, int initGemCount, int level, double coinValue)
+    public void AddCoinValue(FeatureBonusType bonusType, int initGemCount, int level, double coinValue)
     {
         var key = (bonusType, initGemCount, level);
-        this.coinWithRedValue[key] = this.coinWithRedValue.GetValueOrDefault(key, 0) + coinValue;
+        this.coinValue[key] = this.coinValue.GetValueOrDefault(key, 0) + coinValue;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void AddCoinNoRedCount(FeatureBonusType bonusType, int initGemCount, int level)
+    public void AddSplitCount(FeatureBonusType bonusType, int initGemCount, int level)
     {
         var key = (bonusType, initGemCount, level);
-        this.coinNoRedCount[key] = this.coinNoRedCount.GetValueOrDefault(key, 0) + 1;
+        this.splitCount[key] = this.splitCount.GetValueOrDefault(key, 0) + 1;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void AddCoinNoRedValue(FeatureBonusType bonusType, int initGemCount, int level, double coinValue)
+    public void AddSpinAdd1SpinCount(FeatureBonusType bonusType, int initGemCount, int level)
     {
         var key = (bonusType, initGemCount, level);
-        this.coinNoRedValue[key] = this.coinNoRedValue.GetValueOrDefault(key, 0) + coinValue;
+        this.spinAdd1SpinCount[key] = this.spinAdd1SpinCount.GetValueOrDefault(key, 0) + 1;
     }
 }
