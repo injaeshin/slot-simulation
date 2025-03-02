@@ -196,7 +196,7 @@ public class FeatureStorage
         }
 
         remainSpinCount--;
-        spinStats.AddObtainRespinCount(featureBonusType, initGemCount, mummy.Level);
+        spinStats.AddFeatureSpinCount(featureBonusType, initGemCount, mummy.Level);
 
         return true;
     }
@@ -226,7 +226,7 @@ public class FeatureStorage
         return true;
     }
 
-    public bool CollectSymbolValue(int idx, FeatureSymbol symbol, bool isRespin)
+    public bool CollectSymbolValue(int idx, FeatureSymbol symbol, bool isRespin, bool shouldLog = true)
     {
         bool hasRedCoin = false;
         switch (symbol.BonusType)
@@ -242,17 +242,20 @@ public class FeatureStorage
                 spinStats.AddFreeSpinCoinCount(featureBonusType, initGemCount, mummy.Level);
                 break;
             default: // Coin or Jackpot
-                if (isRespin)
-                    spinStats.AddRespinObtainCoinValue(featureBonusType, initGemCount, mummy.Level, symbol.Value);
-                else
-                    spinStats.AddObtainCoinValue(featureBonusType, initGemCount, mummy.Level, symbol.Value);
+                if (shouldLog)
+                {
+                    if (isRespin)
+                        spinStats.AddRespinObtainCoinValue(featureBonusType, initGemCount, mummy.Level, symbol.Value);
+                    else
+                        spinStats.AddObtainCoinValue(featureBonusType, initGemCount, mummy.Level, symbol.Value);
+                }
                 break;
         }
 
         return hasRedCoin;
     }
 
-    public void CollectSymbol(int idx, FeatureSymbol symbol, bool isRespin)
+    public void CollectSymbol(int idx, FeatureSymbol symbol, bool isRespin, bool shouldLog = true)
     {
         if (symbol.Type == FeatureSymbolType.Coin)
         {
@@ -262,11 +265,13 @@ public class FeatureStorage
         {
             GemCount--;
             mummy.ObtainGem();
-
-            if (isRespin)
-                throw new Exception("Gem is not allowed to be respin");
-            else
-                spinStats.AddObtainGemValue(featureBonusType, initGemCount, mummy.Level, symbol.Value);
+            if (shouldLog)
+            {
+                if (isRespin)
+                    throw new Exception("Gem is not allowed to be respin");
+                else
+                    spinStats.AddObtainGemValue(featureBonusType, initGemCount, mummy.Level, symbol.Value);
+            }
         }
 
         symbol.Clear();
@@ -287,6 +292,11 @@ public class FeatureStorage
     public void TestAddGemCount()
     {
         spinStats.AddCreateGemCount(featureBonusType, initGemCount, mummy.Level);
+    }
+
+    public void TestAddGemValue(double value)
+    {
+        spinStats.AddObtainGemValue(featureBonusType, initGemCount, mummy.Level, value);
     }
 
     public void TestAddCoinCount()

@@ -44,7 +44,7 @@ public class FeatureSymbolCollect
         return hasRedCoin;
     }
 
-    public void CollectGemScreenArea(FeatureStorage fs)
+    public void CollectGemScreenArea(FeatureStorage fs, bool shouldLog = true)
     {
         var gemCount = fs.GemCount;
         if (gemCount <= 0)
@@ -65,15 +65,16 @@ public class FeatureSymbolCollect
                 FeatureMummy.Move(fs, idx);
             }
 
+            var isRespin = false;
             if (symbol.First.Type == FeatureSymbolType.Gem)
             {
-                fs.CollectSymbolValue(idx, symbol.First, isRespin: false);
-                fs.CollectSymbol(idx, symbol.First, isRespin: false);
+                fs.CollectSymbolValue(idx, symbol.First, isRespin, shouldLog);
+                fs.CollectSymbol(idx, symbol.First, isRespin, shouldLog);
             }
             else if (symbol.Second.Type == FeatureSymbolType.Gem)
             {
-                fs.CollectSymbolValue(idx, symbol.Second, isRespin: false);
-                fs.CollectSymbol(idx, symbol.Second, isRespin: false);
+                fs.CollectSymbolValue(idx, symbol.Second, isRespin, shouldLog);
+                fs.CollectSymbol(idx, symbol.Second, isRespin, shouldLog);
             }
 
             mummy.LevelUp(fs);

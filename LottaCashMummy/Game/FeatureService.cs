@@ -36,25 +36,22 @@ public class FeatureService
 
     private void Spin(FeatureStorage fs, Random random)
     {
-
         if (fs.GemCount > 0)
         {
-            symbolCollect.CollectGemScreenArea(fs);
+            symbolCollect.CollectGemScreenArea(fs, shouldLog: false);
         }
 
         while (fs.UseSpinCount())
         {
-            fs.AddSpinCount();
-
             // 심볼 생성
-            //symbol.CreateWithMummyArea(fs, random, isRespin: false);
+            symbol.CreateWithMummyArea(fs, random, isRespin: false);
             symbol.CreateWithoutMummyArea(fs, random);
 
             // 머미 영역 심볼 획득
             var hasRedCoin = symbolCollect.CollectCoinInMummyArea(fs, isRespin: false);
             if (hasRedCoin)
             {
-                //Respin(fs, random);
+                Respin(fs, random);
             }
 
             symbolCollect.CollectGemScreenArea(fs);
@@ -63,8 +60,8 @@ public class FeatureService
             fs.ClearSymbolInScreenArea();
         }
 
-        //var value = new double[] { 500, 100, 80, 60, 50, 40, 30, 20, 15, 12.5, 10, 8, 5, 4, 3, 2, 1, 0.5 };
-        //var weight = new int[] { 1, 4, 10, 10, 15, 15, 15, 15, 15, 15, 15, 20, 20, 20, 20, 30, 300, 500 };
+        //var value = new double[] { 500, 100, 80, 60, 50, 0, 40, 30, 20, 15, 12.5, 10, 8, 5, 4, 3, 2, 1, 0.5 };
+        //var weight = new int[] { 1, 4, 10, 10, 15, 15, 15, 15, 15, 15, 15, 15, 20, 20, 20, 20, 30, 300, 500 };
         //var cumulativeWeight = new int[value.Length];
         //cumulativeWeight[0] = weight[0];
         //for (int i = 1; i < value.Length; i++)
@@ -99,6 +96,25 @@ public class FeatureService
         //        {
         //            //gemCount++;
         //            fs.TestAddGemCount();
+        //            var cv = random.Next(0, cumulativeWeight[cumulativeWeight.Length - 1]);
+
+        //            int selectedIndex = -1;
+        //            for (int i = 0; i < cumulativeWeight.Length; i++)
+        //            {
+        //                if (cv < cumulativeWeight[i])
+        //                {
+        //                    selectedIndex = i;
+        //                    break;
+        //                }
+        //            }
+
+        //            if (selectedIndex == -1)
+        //            {
+        //                throw new Exception($"Invalid cumulative weight {cv}");
+        //            }
+
+        //            var selectedValue = value[selectedIndex];
+        //            fs.TestAddGemValue(selectedValue);
         //        }
         //        // coin은 5+17 = 22
         //        else if (n < 22)
@@ -126,20 +142,8 @@ public class FeatureService
         //            fs.TestAddCoinValue(selectedValue);
         //            //coinValue += selectedValue;
         //        }
-
-
-        //        // if (gemCount == requiredGemToNextLevel[level])
-        //        // {
-        //        //     fs.SpinStats.Feature.AddTestLevelEnterCount(level);
-        //        //     fs.SpinStats.Feature.AddTestTotalLevelUpSuccessSpinCount(level);
-        //        //     fs.AddBonusSpinCount(bonusSpinCount[level]);
-        //        //     spinCount = 0;
-        //        //     gemCount = 0;
-        //        //     level++;
-        //        // }
         //    }
         //}
-
     }
 
     private void Respin(FeatureStorage fs, Random random)
