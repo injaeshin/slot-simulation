@@ -11,53 +11,35 @@ class Program
 {
     static async Task Main()
     {
-        var services = CreateServices();
+        var conn = $"Data Source=file:memdb_{Guid.NewGuid():N}?mode=memory&cache=shared&Pooling=true&Max Pool Size=50;";
 
-        using var scope = services.CreateScope();
-        Application app = scope.ServiceProvider.GetRequiredService<Application>();
-        await app.RunAsync();
-    }
-
-    private static ServiceProvider CreateServices()
-    {
         var configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
             //.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
             .Build();
 
-        var dbSettings = new DatabaseSettings();
-        //configuration.GetSection("DatabaseSettings").Bind(dbSettings);
-
         var services = new ServiceCollection();
-        services.AddSingleton(dbSettings);
         services.AddSingleton<IConfiguration>(configuration);
-
-        var connectionString = dbSettings.UseInMemoryDatabase
-            ? DbConnectionPool.CreateSharedMemoryConnectionString()
-            : DbConnectionPool.CreateLocalFileConnectionString(dbSettings.DatabasePath);
-
-        Console.WriteLine($"Database Settings: {dbSettings.UseInMemoryDatabase} Connection String: {connectionString}");
-
-        // 연결 풀 등록
-        services.AddSingleton<DbConnectionPool>(provider =>
-            new DbConnectionPool(
-                connectionString,
-                dbSettings.ConnectionPoolSize,
-                dbSettings.AutoCreateTables
-            )
-        );
-
-        // 리포지토리 등록
-        services.AddSingleton<IDbRepository>(provider =>
-            new DbRepository(provider.GetRequiredService<DbConnectionPool>())
-        );
-
+        services.AddSingleton<IConnection>(provider => new DbConnection(conn));
+        services.AddSingleton<IDbRepository, DbRepository>();
+        services.AddTransient<DbInitializer>();
         services.AddTransient<Application>();
-
         var serviceProvider = services.BuildServiceProvider();
 
-        return serviceProvider;
+        try
+        {
+            var dbInitializer = serviceProvider.GetRequiredService<DbInitializer>();
+            dbInitializer.Initialize();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+        using var scope = serviceProvider.CreateScope();
+        Application app = scope.ServiceProvider.GetRequiredService<Application>();
+        await app.RunAsync();
     }
 }
 

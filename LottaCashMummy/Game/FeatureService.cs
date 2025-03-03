@@ -1,6 +1,8 @@
 
 using LottaCashMummy.Buffer;
+using LottaCashMummy.Common;
 using System;
+using System.Security.Cryptography.X509Certificates;
 
 namespace LottaCashMummy.Game;
 
@@ -27,11 +29,20 @@ public class FeatureService
 
     private void Spin(FeatureStorage fs)
     {
+        var featureType = fs.FeatureBonusType;
+        if ((featureType & FeatureBonusType.Collect) != FeatureBonusType.Collect)
+        {
+            return;
+        }
+
+        if (fs.InitGemCount != 1)
+            return;
+
         fs.Enter();
 
         while (fs.UseSpinCount())
         {
-            int splitSymbolIndex = symbol.CreateSymbolToScreenArea(fs);
+            int splitSymbolIndex = symbol.CreateSymbol(fs);
             symbolCollect.CollectCoin(fs, splitSymbolIndex, isRespin: false, out bool hasRedCoin);
             if (hasRedCoin)
             {
@@ -40,8 +51,7 @@ public class FeatureService
 
             symbolCollect.CollectGem(fs, splitSymbolIndex, isRespin: false);
 
-            // 초기화
-            fs.ClearSymbolInScreenArea();
+            fs.ClearAllSymbols();
         }
     }
 
@@ -65,9 +75,9 @@ public class FeatureService
             }
 
             fs.UseRespin();
-            fs.ClearSymbolInMummyArea();
+            fs.ClearSymbolsInMummyArea();
 
-            splitSymbolIdx = symbol.CreateSymbolToMummyArea(fs, splitSymbolIdx);
+            splitSymbolIdx = symbol.CreateSymbolRespin(fs, splitSymbolIdx);
             if (fs.CoinCount == 0)
             {
                 break;

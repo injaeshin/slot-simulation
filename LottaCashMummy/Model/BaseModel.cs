@@ -1,30 +1,19 @@
 
-using Dapper.ColumnMapper;
 using LottaCashMummy.Common;
-using SQLite;
 
 namespace LottaCashMummy.Model;
 
-[Table("base_spin")]
 public class BaseSpinModel
 {
-    [PrimaryKey]
     public int SpinCount { get; set; }
 }
 
-[Table("base_payout")]
-public class BasePayoutModel
+public class BasePayWinModel
 {
-    [PrimaryKey]
-    //[ColumnMapping("sym_type")]
-    public SymbolType SymbolType { get; set; }
+    public int SymbolType { get; set; }
 
-    [PrimaryKey]
-    //[ColumnMapping("hit")]
     public int Hit { get; set; }
 
-    [NotNull]
-    //[ColumnMapping("amount")]
-    public int Amount { get; set; }
+    public long Amount { get; set; }
 }
 

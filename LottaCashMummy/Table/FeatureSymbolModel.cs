@@ -123,7 +123,7 @@ public class SymbolModelParser
                 var weight = weights[i];
                 if (weight <= 0)
                 {
-                    Console.WriteLine($"[passed] - {key} - value: {model.Value[i]} - weight: {weight}");
+                    Console.WriteLine($"[passed] - {key} - value: {model.Value[i]} - weight: {weight} - type: {model.Type[i]}");
                     continue;
                 }
                 for (int j = 0; j < weight; j++)

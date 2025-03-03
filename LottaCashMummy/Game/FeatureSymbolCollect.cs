@@ -22,6 +22,9 @@ public class FeatureSymbolCollect
         for (int i = 0; i < coinCount; i++)
         {
             var idx = coinIndices[i];
+            if (!fs.IsActiveMummyArea(idx))
+                throw new Exception("idx is not in mummy area");
+
             var symbol = fs.GetSymbol(idx);
             if (!symbol.HasCoin() && !symbol.HasRedCoin())
             {
@@ -71,11 +74,9 @@ public class FeatureSymbolCollect
                 CollectBasedOnSymbol(fs, idx, symbol.First, isRespin);
             }
         }
-
-        mummy.LevelUp(fs);
     }
 
-    private static void CollectBasedOnSymbol(FeatureStorage fs, int idx, FeatureSymbol symbol, bool isRespin)
+    private void CollectBasedOnSymbol(FeatureStorage fs, int idx, FeatureSymbol symbol, bool isRespin)
     {
         if (isRespin)
         {
@@ -85,5 +86,7 @@ public class FeatureSymbolCollect
         {
             fs.CollectSymbol(idx, symbol);
         }
+
+        mummy.LevelUp(fs);
     }
 }

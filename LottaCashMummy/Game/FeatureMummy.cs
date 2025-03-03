@@ -20,7 +20,7 @@ namespace LottaCashMummy.Game
             }
 
             fs.InitMummy(mummyPosition, mummyLevel!.Area, mummyLevel.Level, mummyLevel.ReqGem);
-            CalculateArea(fs.MummyArea, mummyPosition, mummyLevel.Area);
+            CalculateArea(fs, mummyPosition, mummyLevel.Area);
         }
 
         public void LevelUp(FeatureStorage fs)
@@ -35,22 +35,21 @@ namespace LottaCashMummy.Game
                 throw new Exception("Mummy level not found");
             }
 
-            if (!fs.MummyLevelUp(nextLevel.Area, nextLevel.ReqGem))
+            if (!fs.MummyLevelUp(nextLevel.Area, nextLevel.ReqGem, nextLevel.Spin))
             {
                 throw new Exception("Mummy level up failed");
             }
 
-            fs.AddBonusSpinCount(nextLevel.Spin);
             fs.Mummy.CenterIndex = CalculateCenterIndex(fs.Mummy.CenterIndex, fs.Mummy.Area);
-            CalculateArea(fs.MummyArea, fs.Mummy.CenterIndex, fs.Mummy.Area);
+            CalculateArea(fs, fs.Mummy.CenterIndex, fs.Mummy.Area);
         }
 
-        public static bool Move(FeatureStorage fs, int gemIndex)
-        {
-            fs.Mummy.CenterIndex = CalculateCenterIndex(gemIndex, fs.Mummy.Area);
-            CalculateArea(fs.MummyArea, fs.Mummy.CenterIndex, fs.Mummy.Area);
-            return true;
-        }
+        // public static bool Move(FeatureStorage fs, int gemIndex)
+        // {
+        //     fs.Mummy.CenterIndex = CalculateCenterIndex(gemIndex, fs.Mummy.Area);
+        //     CalculateArea(fs, fs.Mummy.CenterIndex, fs.Mummy.Area);
+        //     return true;
+        // }
 
         public static int CalculateCenterIndex(int position, int blockSize)
         {
@@ -69,9 +68,9 @@ namespace LottaCashMummy.Game
             return (centerRow * SlotConst.FEATURE_COLS) + centerCol;
         }
 
-        public static void CalculateArea(Span<int> area, int centerIndex, int blockSize)
+        public static void CalculateArea(FeatureStorage fs, int centerIndex, int blockSize)
         {
-            area.Clear();
+            fs.ClearMummyArea();
 
             int currentRow = centerIndex / SlotConst.FEATURE_COLS;
             int currentCol = centerIndex % SlotConst.FEATURE_COLS;
@@ -87,7 +86,8 @@ namespace LottaCashMummy.Game
                 for (int col = 0; col < sideLength; col++)
                 {
                     int index = (startRow + row) * SlotConst.FEATURE_COLS + (startCol + col);
-                    area[index] = 1;
+                    fs.AddMummyActiveArea(index);
+
                 }
             }
         }

@@ -21,6 +21,8 @@ public class FeatureStorage
     public FeatureBonusType FeatureBonusType => featureBonusType;
 
     private int initGemCount;
+    public int InitGemCount => initGemCount;
+
     private int remainSpinCount;
 
     private readonly SymbolPair[] screenArea;
@@ -61,8 +63,8 @@ public class FeatureStorage
 
     public void Clear()
     {
-        ClearSymbolInScreenArea();
-        ClearMummyAreaIndices();
+        ClearAllSymbols();
+        ClearMummyArea();
         mummy.Clear();
 
         initGemCount = 0;
@@ -71,7 +73,7 @@ public class FeatureStorage
         featureBonusType = FeatureBonusType.None;
     }
 
-    public void ClearSymbolInScreenArea()
+    public void ClearAllSymbols()
     {
         for (int i = 0; i < screenArea.Length; i++)
         {
@@ -86,7 +88,7 @@ public class FeatureStorage
         CoinCount = 0;
     }
 
-    public void ClearSymbolInMummyArea()
+    public void ClearSymbolsInMummyArea()
     {
         for (int i = 0; i < mummyArea.Length; i++)
         {
@@ -97,15 +99,14 @@ public class FeatureStorage
         }
     }
 
-    public void ClearMummyAreaIndices()
+    public void ClearMummyArea()
     {
+        Array.Clear(mummyArea, 0, mummyArea.Length);
         Array.Clear(mummyActiveIndices, 0, mummyActiveIndices.Length);
         MummyAreaCount = 0;
     }
 
-
-
-#region Create Symbol
+    #region Create Symbol
 
     private void CreateBlankSymbol(int idx)
     {
@@ -139,9 +140,9 @@ public class FeatureStorage
         coinIndices[CoinCount++] = idx;
     }
 
-#endregion
+    #endregion
 
-#region Add Symbol
+    #region Add Symbol
 
 
 
@@ -206,9 +207,7 @@ public class FeatureStorage
             case FeatureSymbolType.Gem:
                 throw new Exception("Gem is not allowed to be respin");
             case FeatureSymbolType.RedCoin:
-                CreateRedCoinSymbol(idx, bonusType, value);
-                featureStats.AddRedCoinCount(featureBonusType, initGemCount, mummy.Level);
-                break;
+                throw new Exception("RedCoin is not allowed to be respin");
             default:
                 throw new ArgumentException($"Invalid feature symbol type: {symbolType}");
         }
@@ -216,31 +215,22 @@ public class FeatureStorage
 
     #endregion
 
-    public void CollectGemSymbolFromBaseGame(FeatureSymbolType symbolType, FeatureBonusValueType bonusType, double value)
-    {
-        if (symbolType != FeatureSymbolType.Gem)
-        {
-            throw new Exception("Invalid symbol type");
-        }
-
-        // 젬 획득!
-    }
-
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetBonusType(FeatureBonusType featureBonusType) => this.featureBonusType = featureBonusType;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetInitGemCount(int cnt) => this.initGemCount = cnt;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddBonusSpinCount(int spinCount) => remainSpinCount += spinCount;
 
-    public void AddMummyActiveArea(int idx) => mummyActiveIndices[MummyAreaCount++] = idx;
-
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public SymbolPair GetSymbol(int index) => screenArea[index];
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsActiveMummyArea(int index) => mummyArea[index] == 1;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int GetMummyAreaCount() => MummyAreaCount;
-
     public bool UseSpinCount()
     {
         if (remainSpinCount <= 0)
@@ -254,25 +244,30 @@ public class FeatureStorage
         return true;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Enter()
     {
         remainSpinCount = SlotConst.FEATURE_SPIN_COUNT;
-        featureStats.AddLevel(featureBonusType, initGemCount, mummy.Level);
+        featureStats.AddLevelUp(featureBonusType, initGemCount, mummy.Level);
     }
 
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void InitMummy(int centerIndex, int area, int level, int reqGem)
     {
         mummy.Init(centerIndex, area, level, reqGem);
     }
 
-    public bool MummyLevelUp(int newArea, int nextGemsToLevel)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool MummyLevelUp(int newArea, int nextGemsToLevel, int spin)
     {
         if (!mummy.LevelUp(newArea, nextGemsToLevel, out int remainGemCount))
         {
             throw new Exception("Level Up failed");
         }
 
-        featureStats.AddLevel(featureBonusType, initGemCount, mummy.Level);
+        AddBonusSpinCount(spin);
+        featureStats.AddLevelUp(featureBonusType, initGemCount, mummy.Level);
 
         return true;
     }
@@ -288,11 +283,11 @@ public class FeatureStorage
                 RemoveCoin(symbol);
                 break;
             case FeatureSymbolType.Gem:
-                mummy.ObtainGem();
+                CollectSymbolValue(idx, symbol);
                 RemoveGem(symbol);
                 break;
             case FeatureSymbolType.RedCoin:
-                featureStats.AddRedCoinCount(featureBonusType, initGemCount, mummy.Level);
+                //featureStats.AddRedCoinCount(featureBonusType, initGemCount, mummy.Level);
                 break;
             default:
                 throw new Exception("Invalid symbol type");
@@ -303,6 +298,13 @@ public class FeatureStorage
 
     private void CollectSymbolValue(int idx, FeatureSymbol symbol)
     {
+        if (symbol.Type == FeatureSymbolType.Gem)
+        {
+            mummy.ObtainGem();
+            featureStats.AddGemValue(featureBonusType, initGemCount, mummy.Level, symbol.Value);
+            return;
+        }
+
         switch (symbol.BonusType)
         {
             case FeatureBonusValueType.PlusSpin:
@@ -310,10 +312,15 @@ public class FeatureStorage
                 featureStats.AddSpinAdd1SpinCount(featureBonusType, initGemCount, mummy.Level);
                 break;
             case FeatureBonusValueType.Pay:
+            case FeatureBonusValueType.Grand:
+            case FeatureBonusValueType.Mega:
+            case FeatureBonusValueType.Major:
+            case FeatureBonusValueType.Minor:
+            case FeatureBonusValueType.Mini:
                 featureStats.AddCoinValue(featureBonusType, initGemCount, mummy.Level, symbol.Value);
                 break;
             default:
-                break;
+                throw new Exception("Invalid symbol bonus type");
         }
     }
 
@@ -339,13 +346,19 @@ public class FeatureStorage
                 featureStats.AddSpinAdd1SpinCount(featureBonusType, initGemCount, mummy.Level);
                 break;
             case FeatureBonusValueType.Pay:
+            case FeatureBonusValueType.Grand:
+            case FeatureBonusValueType.Mega:
+            case FeatureBonusValueType.Major:
+            case FeatureBonusValueType.Minor:
+            case FeatureBonusValueType.Mini:
                 featureStats.AddRespinCoinValue(featureBonusType, initGemCount, mummy.Level, symbol.Value);
                 break;
             default:
-                break;
+                throw new Exception("Invalid symbol bonus type");
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void RemoveGem(FeatureSymbol symbol)
     {
         if (symbol.Type != FeatureSymbolType.Gem)
@@ -356,6 +369,7 @@ public class FeatureStorage
         GemCount--;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void RemoveCoin(FeatureSymbol symbol)
     {
         if (symbol.Type != FeatureSymbolType.Coin)
@@ -366,15 +380,34 @@ public class FeatureStorage
         CoinCount--;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void CollectGemFromBaseGame(double value)
     {
         mummy.ObtainGem();
-
         // didn't add value to stats.
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void UseRespin()
     {
         featureStats.AddRespinCount(featureBonusType, initGemCount, mummy.Level);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void AddSplit()
+    {
+        featureStats.AddSplitCount(featureBonusType, initGemCount, mummy.Level);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void AddMummyActiveArea(int index)
+    {
+        if (mummyArea[index] == 1)
+        {
+            throw new Exception("Mummy active area already exists");
+        }
+
+        mummyArea[index] = 1;
+        mummyActiveIndices[MummyAreaCount++] = index;
     }
 }

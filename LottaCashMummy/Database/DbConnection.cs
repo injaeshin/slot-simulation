@@ -4,80 +4,79 @@ using Microsoft.Data.Sqlite;
 
 namespace LottaCashMummy.Database;
 
-public interface IDatabaseConnection : IDisposable
+public interface IConnection
 {
-    IDbConnection Connection { get; }
+    void Dispose();
     T QuerySingle<T>(string sql, object? param = null);
     IEnumerable<T> Query<T>(string sql, object? param = null);
     int Execute(string sql, object? param = null);
     int Execute(string sql, object? param = null, IDbTransaction? transaction = null);
-
     Task<T> QuerySingleAsync<T>(string sql, object? param = null);
     Task<IEnumerable<T>> QueryAsync<T>(string sql, object? param = null);
     Task<int> ExecuteAsync(string sql, object? param = null);
 
     IDbTransaction BeginTransaction();
     IDbCommand CreateCommand();
-    void Open();
 }
 
-public class DbConnection : IDatabaseConnection, IDisposable
+public class DbConnection : IConnection, IDisposable
 {
     private readonly IDbConnection connection;
 
-    public DbConnection(string connectionString)
+
+    public DbConnection(string conn)
     {
-        this.connection = new SqliteConnection(connectionString);
+        connection = new SqliteConnection(conn);
+        connection.Open();
     }
 
-    public IDbConnection Connection => connection;
-
-    public void Open() => connection.Open();
-
-    public void Dispose() => connection.Dispose();
+    public void Dispose()
+    {
+        connection.Dispose();
+    }
 
     public T QuerySingle<T>(string sql, object? param = null)
     {
-        return Connection.QuerySingle<T>(sql, param);
+        return connection.QuerySingle<T>(sql, param);
     }
 
     public IEnumerable<T> Query<T>(string sql, object? param = null)
     {
-        return Connection.Query<T>(sql, param);
+        return connection.Query<T>(sql, param);
     }
 
     public int Execute(string sql, object? param = null)
     {
-        return Connection.Execute(sql, param);
+        return connection.Execute(sql, param);
     }
 
     public int Execute(string sql, object? param = null, IDbTransaction? transaction = null)
     {
-        return Connection.Execute(sql, param, transaction);
+        return connection.Execute(sql, param, transaction);
     }
 
     public async Task<T> QuerySingleAsync<T>(string sql, object? param = null)
     {
-        return await Connection.QuerySingleAsync<T>(sql, param);
+        return await connection.QuerySingleAsync<T>(sql, param);
     }
 
     public async Task<IEnumerable<T>> QueryAsync<T>(string sql, object? param = null)
     {
-        return await Connection.QueryAsync<T>(sql, param);
+        return await connection.QueryAsync<T>(sql, param);
     }
 
     public async Task<int> ExecuteAsync(string sql, object? param = null)
     {
-        return await Connection.ExecuteAsync(sql, param);
+        return await connection.ExecuteAsync(sql, param);
     }
 
     public IDbTransaction BeginTransaction()
     {
-        return Connection.BeginTransaction();
+        return connection.BeginTransaction();
     }
 
     public IDbCommand CreateCommand()
     {
-        return Connection.CreateCommand();
+        return connection.CreateCommand();
     }
 }
