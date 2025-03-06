@@ -1,14 +1,15 @@
 ﻿using LottaCashMummy.Common;
-using LottaCashMummy.Database;
+using LottaCashMummy.Statistics.Model;
 using System.Runtime.CompilerServices;
 
 namespace LottaCashMummy.Buffer;
 
 public class BaseStorage
 {
-    private readonly IDbRepository dbRepository;
     private static readonly byte[,] symbolIndexLookup;
-    private readonly BaseStats baseStats;
+
+    private BaseGameStatsModel baseGameData;
+    public BaseGameStatsModel BaseGameData => baseGameData;
 
     private readonly byte[] symbols;        // 심볼 타입
     private readonly byte[] jackpots;       // 잭팟 정보
@@ -38,10 +39,9 @@ public class BaseStorage
         }
     }
 
-    public BaseStorage(BaseStats baseStats, IDbRepository dbRepository)
+    public BaseStorage(BaseGameStatsModel baseGameStatsModel)
     {
-        this.baseStats = baseStats;
-        this.dbRepository = dbRepository;
+        this.baseGameData = baseGameStatsModel;
 
         symbols = new byte[SlotConst.TOTAL_POSITIONS];
         normalIndices = new byte[SlotConst.TOTAL_POSITIONS];
@@ -57,6 +57,7 @@ public class BaseStorage
             winGems[i] = new BaseSymbol();
         }
     }
+
     public void Clear()
     {
         Array.Clear(symbols, 0, symbols.Length);
@@ -66,7 +67,7 @@ public class BaseStorage
         Array.Clear(normalIndices, 0, normalIndices.Length);
         Array.Clear(gemIndices, 0, gemIndices.Length);
         Array.Clear(mummyPosition, 0, mummyPosition.Length);
-        
+
         for (int i = 0; i < winGemCount; i++)
         {
             winGems[i].Clear();
@@ -77,6 +78,11 @@ public class BaseStorage
         winGemCount = 0;
         mummyCount = 0;
         bonusType = 0;
+    }
+
+    public void StatsClear(BaseGameStatsModel baseGameStatsModel)
+    {
+        baseGameData = baseGameStatsModel;
     }
 
     public byte MummyIndex => mummyCount > 0 ? mummyPosition[0] : (byte)0;
@@ -183,13 +189,13 @@ public class BaseStorage
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddSpinCount()
     {
-        baseStats.AddSpinCount();
+        baseGameData.AddSpinCount();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddWinAmount(byte symbol, int hits, int amount)
     {
-        baseStats.AddPayWin(symbol, hits, amount);
+        baseGameData.AddWinPay(symbol, hits, amount);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

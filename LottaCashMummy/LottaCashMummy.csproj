@@ -15,10 +15,13 @@
   <ItemGroup>
     <Compile Remove="Game\Base\**" />
     <Compile Remove="Game\Feature\**" />
+    <Compile Remove="Model\**" />
     <EmbeddedResource Remove="Game\Base\**" />
     <EmbeddedResource Remove="Game\Feature\**" />
+    <EmbeddedResource Remove="Model\**" />
     <None Remove="Game\Base\**" />
     <None Remove="Game\Feature\**" />
+    <None Remove="Model\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,17 +34,12 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.2" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.2" />
-    <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Model\" />
   </ItemGroup>
 
 </Project>

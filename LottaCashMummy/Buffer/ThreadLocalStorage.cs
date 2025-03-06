@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using LottaCashMummy.Common;
-using LottaCashMummy.Database;
+﻿using LottaCashMummy.Statistics;
 
 namespace LottaCashMummy.Buffer;
 
@@ -11,22 +9,21 @@ public class ThreadLocalStorage
     private readonly Random random;
     public Random Random => random;
 
-    private readonly BaseStorage baseStorage;
+    private StatsResult statsResult;
+    public StatsResult StatsResult => statsResult;
+
+    private BaseStorage baseStorage;
     public BaseStorage BaseStorage => baseStorage;
 
-    private readonly FeatureStorage featureStorage;
+    private FeatureStorage featureStorage;
     public FeatureStorage FeatureStorage => featureStorage;
 
-
-    private readonly SlotStats spinStats;
-    public SlotStats SpinStats => spinStats;
-
-    public ThreadLocalStorage(IDbRepository dbRepository)
+    public ThreadLocalStorage()
     {
         random = new Random(SEED);
-        spinStats = new SlotStats();
-        baseStorage = new BaseStorage(spinStats.BaseStats, dbRepository);
-        featureStorage = new FeatureStorage(spinStats.FeatureStats);
+        statsResult = new StatsResult();
+        baseStorage = new BaseStorage(statsResult.BaseGameStatsModel);
+        featureStorage = new FeatureStorage(statsResult.FeatureGameStatsModel);
     }
 
     public void Clear()
@@ -35,11 +32,11 @@ public class ThreadLocalStorage
         featureStorage.Clear();
     }
 
-
-    // [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    // public double GetBaseWinAmount() => SpinStats.GetBaseWinAmount();
-
-    // [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    // public double GetFeatureWinAmount() => SpinStats.GetFeatureWinAmount();
+    public void StatsClear()
+    {
+        statsResult = new StatsResult();
+        baseStorage.StatsClear(statsResult.BaseGameStatsModel);
+        featureStorage.StatsClear(statsResult.FeatureGameStatsModel);
+    }
 }
 

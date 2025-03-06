@@ -3,13 +3,13 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
 
 using LottaCashMummy.Common;
-using LottaCashMummy.Database;
+using LottaCashMummy.Tests;
 
 namespace LottaCashMummy;
 
 class Program
 {
-    static async Task Main()
+    static async Task Main(string[] args)
     {
         var conn = $"Data Source=file:memdb_{Guid.NewGuid():N}?mode=memory&cache=shared&Pooling=true&Max Pool Size=50;";
 
@@ -21,49 +21,59 @@ class Program
 
         var services = new ServiceCollection();
         services.AddSingleton<IConfiguration>(configuration);
-        services.AddSingleton<IConnection>(provider => new DbConnection(conn));
-        services.AddSingleton<IDbRepository, DbRepository>();
-        services.AddTransient<DbInitializer>();
         services.AddTransient<Application>();
         var serviceProvider = services.BuildServiceProvider();
 
-        try
-        {
-            var dbInitializer = serviceProvider.GetRequiredService<DbInitializer>();
-            dbInitializer.Initialize();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
-
         using var scope = serviceProvider.CreateScope();
+        // // 명령줄 인수로 "test"가 전달되면 테스트 코드 실행
+        // if (args.Length > 0 && args[0].ToLower() == "test")
+        // {
+        //     await RunTests(scope.ServiceProvider);
+        // }
+        // else
+        // {
+        // 기존 시뮬레이션 실행
         Application app = scope.ServiceProvider.GetRequiredService<Application>();
         await app.RunAsync();
+        // }
     }
+    
+    // static async Task RunTests(IServiceProvider serviceProvider)
+    // {
+    //     Console.WriteLine("테스트 모드로 실행합니다...");
+        
+    //     var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+    //     var filePath = configuration.GetSection("file").Value ?? throw new Exception("Reel strip path not found in configuration");
+    //     var kv = GameDataLoader.Read(filePath) ?? throw new Exception("Failed to load reel strip");
+        
+    //     var featureData = new FeatureData(kv);
+        
+    //     // 젬 심볼 값 분포 테스트 실행
+    //     var symbolValueTest = new FeatureSymbolValueTest(featureData);
+    //     symbolValueTest.RunTest();
+        
+    //     await Task.CompletedTask;
+    // }
 }
 
 public class Application
 {
     private readonly IConfiguration configuration;
-    private readonly IDbRepository dbRepository;
 
     //private const int TOTAL_ITERATIONS = 1_000_000_000;
 #if DEBUG
-    private const int TOTAL_ITERATIONS = 1_000_000;
+    private const int TOTAL_ITERATIONS = 100_000_000;
     private static readonly int THREAD_COUNT = 1;
+    private const int BATCH_SIZE = 500_000;
 #else
     private const int TOTAL_ITERATIONS = 312_500_000;
     private static readonly int THREAD_COUNT = Environment.ProcessorCount;
+    private const int BATCH_SIZE = 500_000;
 #endif
 
-
-
-
-    public Application(IConfiguration conf, IDbRepository dbRepository)
+    public Application(IConfiguration conf)
     {
         this.configuration = conf;
-        this.dbRepository = dbRepository;
     }
 
     public async Task RunAsync()
@@ -90,7 +100,7 @@ public class Application
         Console.WriteLine("Progress: ");
 
         // 이미 DI를 통해 주입된 리포지토리 사용
-        var game = new LottaCashMummy(baseData, featureData, jackpotData, dbRepository);
+        var game = new LottaCashMummy(baseData, featureData, jackpotData);
 
         // 진행상황 출력을 위한 타이머
         var progressTimer = new Timer(_ =>
@@ -110,7 +120,7 @@ public class Application
             Console.WriteLine($"[메모리] 현재 사용량: {currentMemory}MB");
         }, null, 0, 5000);  // 5초마다 체크
 
-        game.Run(TOTAL_ITERATIONS, THREAD_COUNT);
+        game.Run(TOTAL_ITERATIONS, BATCH_SIZE, THREAD_COUNT);
 
         memoryTimer.Dispose();
         progressTimer.Dispose();
@@ -118,10 +128,7 @@ public class Application
         sw.Stop();
 
         game.PrintPayWinResult(TOTAL_ITERATIONS);
-        game.PrintFeatureEnterStats(TOTAL_ITERATIONS);
-        //CalculateAndPrintGemProbabilities(config);
-
-        //PrintFeatureTestStats(config);
+        game.PrintFeatureLevelStats(TOTAL_ITERATIONS);
 
         var totalSeconds = sw.ElapsedMilliseconds / 1000.0;
         var avgSpinsPerSec = TOTAL_ITERATIONS / totalSeconds;

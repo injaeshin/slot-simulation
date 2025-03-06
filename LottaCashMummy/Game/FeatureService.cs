@@ -1,8 +1,5 @@
-
 using LottaCashMummy.Buffer;
 using LottaCashMummy.Common;
-using System;
-using System.Security.Cryptography.X509Certificates;
 
 namespace LottaCashMummy.Game;
 
@@ -12,6 +9,8 @@ public class FeatureService
     private readonly FeatureSymbolCreate symbol;
     private readonly FeatureSymbolCollect symbolCollect;
 
+    private readonly IFeatureData fd;
+
     public FeatureService(IFeatureData featureData)
     {
         symbol = new FeatureSymbolCreate(featureData);
@@ -19,6 +18,7 @@ public class FeatureService
         var mummy = new FeatureMummy(featureData);
         setup = new FeatureSetup(featureData, mummy);
         symbolCollect = new FeatureSymbolCollect(mummy);
+        fd = featureData;
     }
 
     public void Execute(ThreadLocalStorage tls)
@@ -29,30 +29,44 @@ public class FeatureService
 
     private void Spin(FeatureStorage fs)
     {
-        var featureType = fs.FeatureBonusType;
-        if ((featureType & FeatureBonusType.Collect) != FeatureBonusType.Collect)
-        {
-            return;
-        }
-
-        if (fs.InitGemCount != 1)
-            return;
-
         fs.Enter();
 
-        while (fs.UseSpinCount())
-        {
-            int splitSymbolIndex = symbol.CreateSymbol(fs);
-            symbolCollect.CollectCoin(fs, splitSymbolIndex, isRespin: false, out bool hasRedCoin);
-            if (hasRedCoin)
-            {
-                Respin(fs, splitSymbolIndex);
-            }
+        // while (fs.UseSpinCount())
+        // {
+        //     for (int idx = 0; idx < SlotConst.SCREEN_AREA; idx++)
+        //     {
+        //         if (fs.IsActiveMummyArea(idx))  // Mummy Area
+        //         {
+        //             if (fd.Symbol.GetRollSymbolInScreenArea(fs.Mummy.Level, fs.SymbolRng) == FeatureSymbolType.Gem)
+        //             {
+        //                 fs.AddSymbol(idx, FeatureSymbolType.Gem, 0, 1);
+        //             }
 
-            symbolCollect.CollectGem(fs, splitSymbolIndex, isRespin: false);
+        //             // var n = fs.SymbolRng.Next(1, 101);
+        //             // if (n <= 5)
+        //             //     fs.AddSymbol(i, FeatureSymbolType.Gem, 0, 1);
+                    
+        //             break;
+        //         }
+        //     }
 
-            fs.ClearAllSymbols();
-        }
+        //     fs.ClearAllSymbols();
+        // }
+
+        // while (fs.UseSpinCount())
+        // {
+        //     int splitSymbolIndex = symbol.CreateSymbol(fs);
+        //     // symbolCollect.CollectCoin(fs, splitSymbolIndex, isRespin: false, out bool hasRedCoin);
+        //     // if (hasRedCoin)
+        //     // {
+        //     //     Respin(fs, splitSymbolIndex);
+        //     // }
+
+        //     // symbolCollect.CollectGem(fs, splitSymbolIndex, isRespin: false);
+
+        //     fs.ClearAllSymbols();
+        // }
+
     }
 
     private void Respin(FeatureStorage fs, int splitSymbolIdx)
