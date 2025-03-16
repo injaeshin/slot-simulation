@@ -1,7 +1,5 @@
 using LottaCashMummy.Buffer;
 using LottaCashMummy.Common;
-using System;
-using System.Runtime.CompilerServices;
 
 namespace LottaCashMummy.Game;
 
@@ -14,13 +12,61 @@ public class FeatureSymbolCreate
         this.fd = featureData;
     }
 
-    public int CreateSymbolRespin(FeatureStorage fs, int splitSymbolIndex)
+    public (int splitSymbolIndex, bool hasRedCoin) CreateSymbol(FeatureStorage fs)
     {
+        var spinResult = fs.SpinResult;
+        var random = fs.Random;
+
         var level = fs.Mummy.Level;
-        var symbolRandom = fs.SymbolRng;
+        var redCoinIndex = GetRedCoinIndex(fs);
+        var splitSymbolIndex = GetSplitSymbolIdx(fs);
+        var hasRedCoin = false;
+
+        for (int idx = 0; idx < SlotConst.SCREEN_AREA; idx++)
+        {
+            if (fs.IsActiveMummyArea(idx))  // Mummy Area
+            {
+                if (redCoinIndex == idx)
+                {
+                    hasRedCoin = true;
+                    continue;
+                }
+
+                spinResult.AddCoinSpinCount();
+                if (fd.Symbol.GetRollSymbolInMummyArea(level, random) != FeatureSymbolType.Coin)
+                    continue;
+
+                if (splitSymbolIndex == idx)
+                    SetSplitSymbolValue(fs, FeatureSymbolType.Coin);
+                else
+                    SetSymbolValue(fs, FeatureSymbolType.Coin);
+            }
+            else  // Screen Area
+            {
+                spinResult.AddGemSpinCount();
+                if (fd.Symbol.GetRollSymbolInScreenArea(level, random) != FeatureSymbolType.Gem)
+                    continue;
+
+                if (splitSymbolIndex == idx)
+                    SetSplitSymbolValue(fs, FeatureSymbolType.Gem);
+                else
+                    SetSymbolValue(fs, FeatureSymbolType.Gem);
+            }
+        }
+
+        return (splitSymbolIndex, hasRedCoin);
+    }
+
+    public (int, bool) CreateSymbolRespin(FeatureStorage fs, int splitSymbolIndex)
+    {
+        var spinResult = fs.SpinResult;
+        var level = fs.Mummy.Level;
+        var random = fs.Random;
 
         if (splitSymbolIndex == -1)
             splitSymbolIndex = GetSplitSymbolIdx(fs);
+
+        var hasCoin = false;
 
         var mummyActiveCount = fs.MummyActiveIndices.Length;
         for (int idx = 0; idx < mummyActiveCount; idx++)
@@ -28,116 +74,74 @@ public class FeatureSymbolCreate
             if (!fs.IsActiveMummyArea(idx))
                 throw new Exception($"Invalid mummy area index {idx}");
 
-            if (fd.Symbol.GetRollSymbolInMummyArea(level, symbolRandom) != FeatureSymbolType.Coin)
+            spinResult.AddCoinSpinCountRespin();
+            if (fd.Symbol.GetRollSymbolInMummyArea(level, random) != FeatureSymbolType.Coin)
                 continue;
 
+            hasCoin = true;
+
             if (splitSymbolIndex == idx)
-                AddSplitSymbolWithRespin(idx, fs, FeatureSymbolType.Coin);
+                SetSplitSymbolValueRespin(fs, FeatureSymbolType.Coin);
             else
-                AddSymbolWithRespin(idx, fs, FeatureSymbolType.Coin);
+                SetSymbolValueRespin(fs, FeatureSymbolType.Coin);
         }
 
-        return splitSymbolIndex;
+        return (splitSymbolIndex, hasCoin);
     }
 
-    public int CreateSymbol(FeatureStorage fs)
-    {
-        var symbolRandom = fs.SymbolRng;
-
-        var level = fs.Mummy.Level;
-        //var redCoinIndex = GetRedCoinIndex(fs);
-        var splitSymbolIndex = -1; //GetSplitSymbolIdx(fs);
-
-        for (int idx = 0; idx < SlotConst.SCREEN_AREA; idx++)
-        {
-            if (fs.IsActiveMummyArea(idx))  // Mummy Area
-            {
-                if (fd.Symbol.GetRollSymbolInScreenArea(level, symbolRandom) != FeatureSymbolType.Gem)
-                    continue;
-
-                AddSymbol(idx, fs, FeatureSymbolType.Gem);
-
-                // if (redCoinIndex == idx)
-                // {
-                //     AddRedCoin(idx, fs);
-                //     continue;
-                // }
-
-                // // Coin
-                // if (fd.Symbol.GetRollSymbolInScreenArea(level, symbolRandom) != FeatureSymbolType.Coin)
-                //     continue;
-
-                // if (splitSymbolIndex == idx)
-                //     AddSplitSymbol(idx, fs, FeatureSymbolType.Coin);
-                // else
-                //     AddSymbol(idx, fs, FeatureSymbolType.Coin);
-            }
-            else  // Screen Area
-            {
-                // if (fd.Symbol.GetRollSymbolInScreenArea(level, symbolRandom) != FeatureSymbolType.Gem)
-                //     continue;
-
-                // if (splitSymbolIndex == idx)
-                //     AddSplitSymbol(idx, fs, FeatureSymbolType.Gem);
-                // else
-                //AddSymbol(idx, fs, FeatureSymbolType.Gem);
-                //break;
-            }
-        }
-
-        return splitSymbolIndex;
-    }
-
-    private void AddSplitSymbol(int idx, FeatureStorage fs, FeatureSymbolType symbolType)
-    {
-        fs.AddSplit();
-
-        var level = fs.Mummy.Level;
-        var valueRandom = fs.ValueRng;
-
-        var featureValue = fd.Symbol.GetRollSymbolValues(level, fs.FeatureBonusType, valueRandom);
-        fs.AddSymbol(idx, symbolType, featureValue.BonusType, featureValue.Value);
-
-        var featureValue2 = fd.Symbol.GetRollSymbolValues(level, fs.FeatureBonusType, valueRandom);
-        fs.AddSymbol(idx, symbolType, featureValue2.BonusType, featureValue2.Value);
-    }
-
-    private void AddSplitSymbolWithRespin(int idx, FeatureStorage fs, FeatureSymbolType symbolType)
-    {
-        fs.AddSplit();
-
-        var level = fs.Mummy.Level;
-        var valueRandom = fs.ValueRng;
-
-        var featureValue = fd.Symbol.GetRollSymbolValues(level, fs.FeatureBonusType, valueRandom);
-        fs.AddSymbolWithRespin(idx, symbolType, featureValue.BonusType, featureValue.Value);
-
-        var featureValue2 = fd.Symbol.GetRollSymbolValues(level, fs.FeatureBonusType, valueRandom);
-        fs.AddSymbolWithRespin(idx, symbolType, featureValue2.BonusType, featureValue2.Value);
-    }
-
-    private void AddRedCoin(int idx, FeatureStorage fs)
-    {
-        fs.AddSymbol(idx, FeatureSymbolType.RedCoin, FeatureBonusValueType.None, 0);
-    }
-
-    private void AddSymbol(int idx, FeatureStorage fs, FeatureSymbolType symbolType)
+    private void SetSymbolValue(FeatureStorage fs, FeatureSymbolType symbolType)
     {
         var level = fs.Mummy.Level;
-        var valueRandom = fs.ValueRng;
+        var random = fs.Random;
+        var spinResult = fs.SpinResult;
 
-        var symbolValue = fd.Symbol.GetRollSymbolValues(level, fs.FeatureBonusType, valueRandom);
-        fs.AddSymbol(idx, symbolType, symbolValue.BonusType, symbolValue.Value);
+        spinResult.AddSymbolCount(symbolType);
+        var value = fd.Symbol.GetRollSymbolValues(level, fs.FeatureBonusType, random);
+        spinResult.AddSymbolValue(symbolType, value.Value);
     }
 
-    private void AddSymbolWithRespin(int idx, FeatureStorage fs, FeatureSymbolType symbolType)
+    private void SetSymbolValueRespin(FeatureStorage fs, FeatureSymbolType symbolType)
     {
         var level = fs.Mummy.Level;
-        var valueRandom = fs.ValueRng;
+        var random = fs.Random;
+        var spinResult = fs.SpinResult;
 
-        var featureValue = fd.Symbol.GetRollSymbolValues(level, fs.FeatureBonusType, valueRandom);
-        fs.AddSymbolWithRespin(idx, symbolType, featureValue.BonusType, featureValue.Value);
-    }    
+        spinResult.AddRespinSymbolCount(symbolType);
+        var value = fd.Symbol.GetRollSymbolValues(level, fs.FeatureBonusType, random);
+        spinResult.AddRespinSymbolValue(symbolType, value.Value);
+    }
+
+    private void SetSplitSymbolValue(FeatureStorage fs, FeatureSymbolType symbolType)
+    {
+        var level = fs.Mummy.Level;
+        var random = fs.Random;
+        var spinResult = fs.SpinResult;
+
+        var value1 = fd.Symbol.GetRollSymbolValues(level, fs.FeatureBonusType, random);
+        var value2 = fd.Symbol.GetRollSymbolValues(level, fs.FeatureBonusType, random);
+
+        spinResult.AddSymbolCount(symbolType);
+        spinResult.AddSymbolValue(symbolType, value1.Value);
+
+        spinResult.AddSymbolCount(symbolType);
+        spinResult.AddSymbolValue(symbolType, value2.Value);
+    }
+
+    private void SetSplitSymbolValueRespin(FeatureStorage fs, FeatureSymbolType symbolType)
+    {
+        var level = fs.Mummy.Level;
+        var random = fs.Random;
+        var spinResult = fs.SpinResult;
+
+        var value1 = fd.Symbol.GetRollSymbolValues(level, fs.FeatureBonusType, random);
+        var value2 = fd.Symbol.GetRollSymbolValues(level, fs.FeatureBonusType, random);
+
+        spinResult.AddRespinSymbolCount(symbolType);
+        spinResult.AddRespinSymbolValue(symbolType, value1.Value);
+
+        spinResult.AddRespinSymbolCount(symbolType);
+        spinResult.AddRespinSymbolValue(symbolType, value2.Value);
+    }
 
     private int GetRedCoinIndex(FeatureStorage fs)
     {
@@ -147,12 +151,12 @@ public class FeatureSymbolCreate
             return -1;
         }
 
-        if (fd.Symbol.GetRollRedCoinSymbolCount(fs.Mummy.Level, fs.SymbolRng) == 0)
+        if (fd.Symbol.GetRollRedCoinSymbolCount(fs.Mummy.Level, fs.Random) == 0)
         {
             return -1;
         }
 
-        var idx = fs.SymbolRng.Next(fs.MummyActiveIndices.Length);
+        var idx = fs.Random.Next(fs.MummyActiveIndices.Length);
         return fs.MummyActiveIndices[idx];
     }
 
@@ -164,12 +168,12 @@ public class FeatureSymbolCreate
             return -1;
         }
 
-        if (fd.Symbol.GetRollSplitSymbolCount(fs.Mummy.Level, fs.SymbolRng) == 0)
+        if (fd.Symbol.GetRollSplitSymbolCount(fs.Mummy.Level, fs.Random) == 0)
         {
             return -1;
         }
 
-        return fs.SymbolRng.Next(fs.ScreenArea.Length);
+        return fs.Random.Next(SlotConst.SCREEN_AREA);
     }
 }
 

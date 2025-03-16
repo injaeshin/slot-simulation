@@ -50,14 +50,24 @@ public class StatsService
         return totalLevelCount;
     }
 
-    public long GetBonusGameTotalSpinCount(int bonusType, int gem, int level)
+    public long GetBonusGameTotalGemSpinCount(int bonusType, int gem, int level)
     {
-        long totalSpinCount = 0;
+        long totalGemSpinCount = 0;
         foreach (var statsResult in statsResults)
         {
-            totalSpinCount += statsResult.FeatureGameStatsModel.SpinCount.GetValueOrDefault((bonusType, gem, level), 0);
+            totalGemSpinCount += statsResult.FeatureGameStatsModel.GemSpinCount.GetValueOrDefault((bonusType, gem, level), 0);
         }
-        return totalSpinCount;
+        return totalGemSpinCount;
+    }
+
+    public long GetBonusGameTotalCoinSpinCount(int bonusType, int gem, int level)
+    {
+        long totalCoinSpinCount = 0;
+        foreach (var statsResult in statsResults)
+        {
+            totalCoinSpinCount += statsResult.FeatureGameStatsModel.CoinSpinCount.GetValueOrDefault((bonusType, gem, level), 0);
+        }
+        return totalCoinSpinCount;
     }
 
     public long GetBonusGameTotalGemCount(int bonusType, int gem, int level)
@@ -78,5 +88,15 @@ public class StatsService
             totalGemValue += statsResult.FeatureGameStatsModel.GemValue.GetValueOrDefault((bonusType, gem, level), 0);
         }
         return totalGemValue;
+    }
+
+    public long GetBonusGameTotalGemSpinCount(int bonusType, int gem, byte level)
+    {
+        long totalGemSpinCount = 0;
+        foreach (var statsResult in statsResults)
+        {
+            totalGemSpinCount += statsResult.FeatureGameStatsModel.GemSpinCount.GetValueOrDefault((bonusType, gem, level), 0);
+        }
+        return totalGemSpinCount;
     }
 }

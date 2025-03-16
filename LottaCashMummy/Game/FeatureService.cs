@@ -7,17 +7,15 @@ public class FeatureService
 {
     private readonly FeatureSetup setup;
     private readonly FeatureSymbolCreate symbol;
-    private readonly FeatureSymbolCollect symbolCollect;
+    private readonly FeatureMummy mummy;
 
     private readonly IFeatureData fd;
 
     public FeatureService(IFeatureData featureData)
     {
         symbol = new FeatureSymbolCreate(featureData);
-
-        var mummy = new FeatureMummy(featureData);
+        mummy = new FeatureMummy(featureData);
         setup = new FeatureSetup(featureData, mummy);
-        symbolCollect = new FeatureSymbolCollect(mummy);
         fd = featureData;
     }
 
@@ -31,42 +29,16 @@ public class FeatureService
     {
         fs.Enter();
 
-        // while (fs.UseSpinCount())
-        // {
-        //     for (int idx = 0; idx < SlotConst.SCREEN_AREA; idx++)
-        //     {
-        //         if (fs.IsActiveMummyArea(idx))  // Mummy Area
-        //         {
-        //             if (fd.Symbol.GetRollSymbolInScreenArea(fs.Mummy.Level, fs.SymbolRng) == FeatureSymbolType.Gem)
-        //             {
-        //                 fs.AddSymbol(idx, FeatureSymbolType.Gem, 0, 1);
-        //             }
+        while (fs.UseSpinCount())
+        {
+            (int splitSymbolIndex, bool hasRedCoin) = symbol.CreateSymbol(fs);
+            if (hasRedCoin)
+            {
+                Respin(fs, splitSymbolIndex);
+            }
 
-        //             // var n = fs.SymbolRng.Next(1, 101);
-        //             // if (n <= 5)
-        //             //     fs.AddSymbol(i, FeatureSymbolType.Gem, 0, 1);
-                    
-        //             break;
-        //         }
-        //     }
-
-        //     fs.ClearAllSymbols();
-        // }
-
-        // while (fs.UseSpinCount())
-        // {
-        //     int splitSymbolIndex = symbol.CreateSymbol(fs);
-        //     // symbolCollect.CollectCoin(fs, splitSymbolIndex, isRespin: false, out bool hasRedCoin);
-        //     // if (hasRedCoin)
-        //     // {
-        //     //     Respin(fs, splitSymbolIndex);
-        //     // }
-
-        //     // symbolCollect.CollectGem(fs, splitSymbolIndex, isRespin: false);
-
-        //     fs.ClearAllSymbols();
-        // }
-
+            CalculateResult(fs);
+        }
     }
 
     private void Respin(FeatureStorage fs, int splitSymbolIdx)
@@ -89,19 +61,27 @@ public class FeatureService
             }
 
             fs.UseRespin();
-            fs.ClearSymbolsInMummyArea();
 
-            splitSymbolIdx = symbol.CreateSymbolRespin(fs, splitSymbolIdx);
-            if (fs.CoinCount == 0)
+            (splitSymbolIdx, var hasCoin) = symbol.CreateSymbolRespin(fs, splitSymbolIdx);
+            if (!hasCoin)
             {
                 break;
             }
-
-            symbolCollect.CollectCoin(fs, splitSymbolIdx, isRespin: true, out bool hasRedCoin);
-            if (hasRedCoin)
-            {
-                throw new Exception("Red coin found");
-            }
         } while (true);
+    }
+
+    private void CalculateResult(FeatureStorage fs)
+    {
+        var spinResult = fs.SpinResult;
+
+        fs.AddStatsAddGemCountAndValue();
+        fs.AddStatsAddCoinCountAndValue();
+        fs.AddStatsAddRedCoinCount();
+
+        if (mummy.LevelUp(fs))
+        {
+            fs.Mummy.CenterIndex = FeatureMummy.CalculateCenterIndex(fs.Mummy.CenterIndex, fs.Mummy.Area);
+            FeatureMummy.CalculateArea(fs, fs.Mummy.CenterIndex, fs.Mummy.Area);
+        }
     }
 }

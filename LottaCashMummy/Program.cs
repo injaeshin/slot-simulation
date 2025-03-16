@@ -25,35 +25,35 @@ class Program
         var serviceProvider = services.BuildServiceProvider();
 
         using var scope = serviceProvider.CreateScope();
-        // // 명령줄 인수로 "test"가 전달되면 테스트 코드 실행
-        // if (args.Length > 0 && args[0].ToLower() == "test")
-        // {
-        //     await RunTests(scope.ServiceProvider);
-        // }
-        // else
-        // {
-        // 기존 시뮬레이션 실행
-        Application app = scope.ServiceProvider.GetRequiredService<Application>();
-        await app.RunAsync();
-        // }
+        // 명령줄 인수로 "test"가 전달되면 테스트 코드 실행
+        if (args.Length > 0 && args[0].ToLower() == "test")
+        {
+            await RunTests(scope.ServiceProvider);
+        }
+        else
+        {
+            // 기존 시뮬레이션 실행
+            Application app = scope.ServiceProvider.GetRequiredService<Application>();
+            await app.RunAsync();
+        }
     }
-    
-    // static async Task RunTests(IServiceProvider serviceProvider)
-    // {
-    //     Console.WriteLine("테스트 모드로 실행합니다...");
-        
-    //     var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-    //     var filePath = configuration.GetSection("file").Value ?? throw new Exception("Reel strip path not found in configuration");
-    //     var kv = GameDataLoader.Read(filePath) ?? throw new Exception("Failed to load reel strip");
-        
-    //     var featureData = new FeatureData(kv);
-        
-    //     // 젬 심볼 값 분포 테스트 실행
-    //     var symbolValueTest = new FeatureSymbolValueTest(featureData);
-    //     symbolValueTest.RunTest();
-        
-    //     await Task.CompletedTask;
-    // }
+
+    static async Task RunTests(IServiceProvider serviceProvider)
+    {
+        Console.WriteLine("테스트 모드로 실행합니다...");
+
+        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+        var filePath = configuration.GetSection("file").Value ?? throw new Exception("Reel strip path not found in configuration");
+        var kv = GameDataLoader.Read(filePath) ?? throw new Exception("Failed to load reel strip");
+
+        var featureData = new FeatureData(kv);
+
+        // 젬 심볼 값 분포 테스트 실행
+        var symbolValueTest = new FeatureSymbolValueTest(featureData);
+        symbolValueTest.RunTest();
+
+        await Task.CompletedTask;
+    }
 }
 
 public class Application

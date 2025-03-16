@@ -69,6 +69,7 @@ public enum FeatureBonusType : byte
     CollectSymbols = Collect | Symbols, // 5   2개
     SpinsSymbols = Spins | Symbols, // 6   2개
     CollectSpinsSymbols = Collect | Spins | Symbols, // 7   3개
+    CollectGem = 8,
 }
 
 // public enum FeatureBonusCombiType : byte

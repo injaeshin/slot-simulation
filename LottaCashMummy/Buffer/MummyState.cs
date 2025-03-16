@@ -28,9 +28,9 @@ public class MummyState
         GemsToLevel = 0;
     }
 
-    public void ObtainGem()
+    public void ObtainGem(int count)
     {
-        GemCount++;
+        GemCount += count;
     }
 
     public bool CanLevelUp()
@@ -53,5 +53,10 @@ public class MummyState
         GemsToLevel = nextGemsToLevel;
 
         return true;
+    }
+
+    public bool IsMaxLevel()
+    {
+        return Level >= SlotConst.MAX_FEATURE_LEVEL;
     }
 }

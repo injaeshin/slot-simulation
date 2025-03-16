@@ -20,15 +20,10 @@ public class FeatureSetup
         var fs = tls.FeatureStorage;
         var random = tls.Random;
 
-        InitializeFeatureGame(fs, bs.FeatureBonusType);
+        fs.Clear();
+        fs.SetBonusType(bs.FeatureBonusType);
         AddGemFromBaseGame(fs, bs);
         SetupInitialMummy(bs, fs, random);
-    }
-
-    private void InitializeFeatureGame(FeatureStorage featureStorage, FeatureBonusType bonusType)
-    {
-        featureStorage.Clear();
-        featureStorage.SetBonusType(bonusType);
     }
 
     private void AddGemFromBaseGame(FeatureStorage featureStorage, BaseStorage baseStorage)
@@ -47,7 +42,7 @@ public class FeatureSetup
                 throw new Exception("Win gem symbol is not set");
             }
 
-            featureStorage.CollectGemFromBaseGame(symbol.Value);
+            featureStorage.CollectGemValue(symbol.Value);
         }
 
         featureStorage.SetInitGemCount(winGemCount);

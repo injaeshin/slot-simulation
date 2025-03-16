@@ -1,4 +1,5 @@
-﻿using LottaCashMummy.Buffer;
+﻿using System.Diagnostics;
+using LottaCashMummy.Buffer;
 using LottaCashMummy.Common;
 
 namespace LottaCashMummy.Game
@@ -23,33 +24,54 @@ namespace LottaCashMummy.Game
             CalculateArea(fs, mummyPosition, mummyLevel.Area);
         }
 
-        public void LevelUp(FeatureStorage fs)
+        public bool LevelUp(FeatureStorage fs)
         {
-            if (!fs.Mummy.CanLevelUp())
+            var spinResult = fs.SpinResult;
+
+            if (spinResult.GemCount <= 0)
+                return false;
+
+
+            var isLevelUp = false;
+            var remainGemCount = spinResult.GemCount + spinResult.RemainGemCount;
+            while (!fs.Mummy.IsMaxLevel())
             {
-                return;
+                var requiredGemCount = fs.Mummy.GemsToLevel - fs.Mummy.GemCount;
+                if (remainGemCount < requiredGemCount)
+                {
+                    break;
+                }
+
+                fs.Mummy.ObtainGem(requiredGemCount);
+                remainGemCount -= requiredGemCount;
+
+                if (!fs.Mummy.CanLevelUp())
+                {
+                    break;
+                }
+
+                if (!featureData.Mummy.TryGetMummyLevel(fs.Mummy.Level + 1, out var nextLevel) || nextLevel == null)
+                {
+                    throw new Exception("Mummy level not found");
+                }
+
+                if (!fs.MummyLevelUp(nextLevel.Area, nextLevel.ReqGem, nextLevel.Spin))
+                {
+                    throw new Exception("Mummy level up failed");
+                }
+
+                isLevelUp = true;
             }
 
-            if (!featureData.Mummy.TryGetMummyLevel(fs.Mummy.Level + 1, out var nextLevel) || nextLevel == null)
+            if (remainGemCount < 0)
             {
-                throw new Exception("Mummy level not found");
+                throw new Exception("Remain gem count is less than 0");
             }
 
-            if (!fs.MummyLevelUp(nextLevel.Area, nextLevel.ReqGem, nextLevel.Spin))
-            {
-                throw new Exception("Mummy level up failed");
-            }
+            spinResult.SetRemainGemCount(remainGemCount);
 
-            fs.Mummy.CenterIndex = CalculateCenterIndex(fs.Mummy.CenterIndex, fs.Mummy.Area);
-            CalculateArea(fs, fs.Mummy.CenterIndex, fs.Mummy.Area);
+            return isLevelUp;
         }
-
-        // public static bool Move(FeatureStorage fs, int gemIndex)
-        // {
-        //     fs.Mummy.CenterIndex = CalculateCenterIndex(gemIndex, fs.Mummy.Area);
-        //     CalculateArea(fs, fs.Mummy.CenterIndex, fs.Mummy.Area);
-        //     return true;
-        // }
 
         public static int CalculateCenterIndex(int position, int blockSize)
         {

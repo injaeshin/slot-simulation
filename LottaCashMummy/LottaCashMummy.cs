@@ -47,7 +47,6 @@ public class LottaCashMummy
             for (long i = 0; i < currentBatchSpins; i++)
             {
                 baseService.SimulateSingleSpin(buffer);
-                buffer.Clear();
             }
 
             statsService.SetStatsResults(batchIndex, buffer.StatsResult);
@@ -100,8 +99,8 @@ public class LottaCashMummy
         Console.WriteLine($"Total Spins: {totalSpins:N0}\n");
 
         var header = String.Format(
-            "{0,-20} {1,10} {2,10} {3,15} {4,15} {5,15} {6,15} {7,15} {8,15} {9,15} {10,15} {11,15} {12,15} {13,15} {14,15} {15,15}",
-            "Type", "Gems", "Level", "EnterCnt", "SpinCnt", "GemCnt", "GemRate", "GemValue", "CoinCnt", "CoinValue", "SplitCnt", "1SpinCnt", "RedCoinCnt", "RespinCnt", "RespinCoinCnt", "RespinCoinValue");
+            "{0,-20} {1,10} {2,10} {3,15} {4,15} {5,15} {6,15} {7,15}",
+            "Type", "Gems", "Level", "EnterCnt", "SpinCnt", "GemCnt", "GemRate", "GemValue", "GemExpVal");
 
         Console.WriteLine(header);
         Console.WriteLine(new string('-', 150));
@@ -114,12 +113,13 @@ public class LottaCashMummy
                 for (byte level = 1; level <= 4; level++)
                 {
                     var levelCount = statsService.GetBonusGameTotalLevelCount(bonusType, gem, level);
-                    var spinCount = statsService.GetBonusGameTotalSpinCount(bonusType, gem, level);
+                    var spinCount = statsService.GetBonusGameTotalGemSpinCount(bonusType, gem, level);
                     var gemCount = statsService.GetBonusGameTotalGemCount(bonusType, gem, level);
                     var gemRate = (double)gemCount / spinCount;
                     var gemValue = statsService.GetBonusGameTotalGemValue(bonusType, gem, level);
+                    var gemExpectedValue = gemValue / gemCount;
 
-                    Console.WriteLine($"{type,-20} {gem,10} {level,10} {levelCount,15:N0} {spinCount,15:N0} {gemCount,15:N0} {gemRate,15:F4} {gemValue,15:F4}");
+                    Console.WriteLine($"{type,-20} {gem,10} {level,10} {levelCount,15:N0} {spinCount,15:N0} {gemCount,15:N0} {gemRate,15:F4} {gemValue,15:F4} {gemExpectedValue,15:F4}");
                 }
             }
             Console.WriteLine(new string('-', 150));

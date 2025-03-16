@@ -4,7 +4,7 @@ namespace LottaCashMummy.Buffer;
 
 public class ThreadLocalStorage
 {
-    private const int SEED = 0xABCDEF;
+    private const int SEED = 0xa1b2c3;
 
     private readonly Random random;
     public Random Random => random;
@@ -23,13 +23,7 @@ public class ThreadLocalStorage
         random = new Random(SEED);
         statsResult = new StatsResult();
         baseStorage = new BaseStorage(statsResult.BaseGameStatsModel);
-        featureStorage = new FeatureStorage(statsResult.FeatureGameStatsModel);
-    }
-
-    public void Clear()
-    {
-        baseStorage.Clear();
-        featureStorage.Clear();
+        featureStorage = new FeatureStorage(statsResult.FeatureGameStatsModel, random);
     }
 
     public void StatsClear()

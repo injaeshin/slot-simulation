@@ -1,5 +1,7 @@
 
+using LottaCashMummy.Buffer;
 using LottaCashMummy.Common;
+using LottaCashMummy.Statistics.Model;
 using System.Diagnostics;
 
 
@@ -9,7 +11,7 @@ namespace LottaCashMummy.Tests
     {
         private readonly IFeatureData fd;
         private readonly Random random;
-        private const int TOTAL_ITERATIONS = 1_000_000;
+        private const int TOTAL_ITERATIONS = 100_000_000;
 
         public FeatureSymbolValueTest(IFeatureData featureData)
         {
@@ -19,71 +21,27 @@ namespace LottaCashMummy.Tests
 
         public void RunTest()
         {
-            Console.WriteLine("===== 젬 심볼 값 분포 테스트 시작 =====\n");
+            int spinCount = 0;
+            int gemCount = 0;
 
-            // 모든 레벨에 대해 테스트 (1-4)
-            for (int level = 1; level <= 1; level++)
+            for (int t = 0; t < TOTAL_ITERATIONS; t++)
             {
-                // 다양한 보너스 타입에 대해 테스트
-                TestSymbolValueDistribution(level, FeatureBonusType.Collect);
-                // TestSymbolValueDistribution(level, FeatureBonusType.Spins);
-                // TestSymbolValueDistribution(level, FeatureBonusType.Symbols);
-                // TestSymbolValueDistribution(level, FeatureBonusType.CollectSpins);
-                // TestSymbolValueDistribution(level, FeatureBonusType.CollectSymbols);
-                // TestSymbolValueDistribution(level, FeatureBonusType.SpinsSymbols);
-                // TestSymbolValueDistribution(level, FeatureBonusType.CollectSpinsSymbols);
-            }
-
-            Console.WriteLine("===== 젬 심볼 값 분포 테스트 완료 =====");
-        }
-
-        private void TestSymbolValueDistribution(int level, FeatureBonusType bonusType)
-        {
-            Console.WriteLine($"\n레벨: {level}, 보너스 타입: {bonusType}");
-
-            var sw = new Stopwatch();
-            sw.Start();
-
-            // 값 분포를 저장할 딕셔너리
-            var valueDistribution = new Dictionary<double, int>();
-            
-            // 총 값을 누적할 변수
-            double totalValue = 0;
-
-            // 지정된 횟수만큼 반복
-            for (int i = 0; i < TOTAL_ITERATIONS; i++)
-            {
-
-
-                // 심볼 값 가져오기
-                var symbolValue = fd.Symbol.GetRollSymbolValues(level, bonusType, random);
-                
-                // 값 분포 업데이트
-                if (!valueDistribution.ContainsKey(symbolValue.Value))
+                spinCount++;
+                for (int i = 0; i < 5; i++)
                 {
-                    valueDistribution[symbolValue.Value] = 0;
+                    for (int idx = 0; idx < 4; idx++)
+                    {
+                        // 5% chance to create a gem
+                        if (random.Next(1, 101) <= 5)
+                        {
+                            gemCount++;
+                        }
+                    }
                 }
-                valueDistribution[symbolValue.Value]++;
-                
-                // 총 값 누적
-                totalValue += symbolValue.Value;
             }
 
-            sw.Stop();
-            
-            // 평균 값 계산
-            double averageValue = totalValue / TOTAL_ITERATIONS;
-            
-            Console.WriteLine($"테스트 실행 시간: {sw.ElapsedMilliseconds}ms");
-            Console.WriteLine($"평균 값: {averageValue:F4}\n");
-            
-            // 값 분포 출력
-            Console.WriteLine("값 분포:");
-            foreach (var kvp in valueDistribution.OrderBy(x => x.Key))
-            {
-                double percentage = (double)kvp.Value / TOTAL_ITERATIONS * 100;
-                Console.WriteLine($"  값: {kvp.Key:F2}, 빈도: {kvp.Value}, 비율: {percentage:F2}%");
-            }
+            var totalSpinCount = TOTAL_ITERATIONS * 5 * 4;
+            Console.WriteLine($"spinCount: {spinCount:N}, gemCount: {gemCount:N}, gemRate: {gemCount / (double)totalSpinCount:F2}");
         }
     }
-} 
+}

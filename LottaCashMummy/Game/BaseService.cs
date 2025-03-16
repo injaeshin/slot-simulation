@@ -30,6 +30,7 @@ public class BaseService
 
     public void SimulateSingleSpin(ThreadLocalStorage buffer)
     {
+        buffer.BaseStorage.Clear();
         buffer.BaseStorage.AddSpinCount();
 
         //var featureTrigger = baseData.BaseSymbol.GetRollBonusTrigger(buffer.Random);
