@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ExcelExport;
@@ -17,8 +18,8 @@ class Program
     private static ServiceProvider CreateServices()
     {
         var configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            //.SetBasePath(Environment.CurrentDirectory)
+            //.SetBasePath(Directory.GetCurrentDirectory())
+            .SetBasePath(Environment.CurrentDirectory)
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
             .Build();
 
@@ -33,36 +34,38 @@ class Program
 
 public class Application
 {
-    private readonly IConfiguration configuration;
+    private readonly JsonReader jsonReader;
 
     public Application(IConfiguration conf)
     {
-        this.configuration = conf;
+        this.jsonReader = new JsonReader(conf.GetSection("file").Value ?? throw new Exception("File not found in configuration"));
     }
 
     public async Task RunAsync()
     {
-        var file = configuration.GetSection("file").Value ?? throw new Exception("File not found in configuration");
+        if (!jsonReader.ReadJson())
+        {
+            throw new Exception("Failed to read JSON file");
+        }
 
-        var writer = new JsonWriter();
+        var file = jsonReader.GetElement("file").GetString() ?? throw new Exception("File not found in JSON");
         var reader = new ExcelReader(file);
         if (!reader.Open())
         {
-            Console.WriteLine("Failed to open file");
-            return;
+            throw new Exception("Failed to open file");
         }
 
-        var data = configuration.GetSection("data") ?? throw new Exception("Sheet section not found in configuration");
-        
-        foreach (var sheet in data.GetChildren())
+        var writer = new JsonWriter();
+        var data = jsonReader.GetElement("data");
+        foreach (JsonProperty sheet in data.EnumerateObject())
         {
-            var sheetName = sheet.Key;
+            var sheetName = sheet.Name;//.GetProperty("sheet").GetString() ?? throw new Exception("Sheet name not found in JSON");
             Console.WriteLine($"Processing sheet: > {sheetName}");
 
-            foreach (var range in sheet.GetChildren())
+            foreach (var range in sheet.Value.EnumerateObject())
             {
-                var rangeName = range.Key;
-                var rangeValue = range.Value;
+                var rangeName = range.Name;
+                var rangeValue = range.Value.GetString();
 
                 if (string.IsNullOrEmpty(rangeValue))
                 {
@@ -89,7 +92,7 @@ public class Application
             }
         }
 
-        var output = configuration.GetSection("output").Value ?? throw new Exception("Output not found in configuration");
+        var output = jsonReader.GetElement("output").GetString() ?? throw new Exception("Output not found in configuration");
         writer.SaveToFile(output);
 
         await Task.CompletedTask;

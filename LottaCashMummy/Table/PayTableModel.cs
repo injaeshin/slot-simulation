@@ -1,6 +1,10 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using LottaCashMummy.Common;
+using Common;
+using LottaCashMummy.Shared;
+
+namespace LottaCashMummy.Table;
+
 
 public class PayTableModel
 {

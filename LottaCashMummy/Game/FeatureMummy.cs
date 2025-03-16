@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using LottaCashMummy.Buffer;
-using LottaCashMummy.Common;
+using LottaCashMummy.Shared;
 
 namespace LottaCashMummy.Game
 {

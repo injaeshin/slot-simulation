@@ -1,4 +1,5 @@
-﻿using LottaCashMummy.Table;
+﻿using Common;
+using LottaCashMummy.Table;
 
 namespace LottaCashMummy;
 

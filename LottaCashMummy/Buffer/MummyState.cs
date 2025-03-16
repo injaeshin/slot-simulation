@@ -1,4 +1,4 @@
-using LottaCashMummy.Common;
+using LottaCashMummy.Shared;
 
 namespace LottaCashMummy.Buffer;
 

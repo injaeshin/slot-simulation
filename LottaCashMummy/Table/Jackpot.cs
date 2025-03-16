@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
-using LottaCashMummy.Common;
+using Common;
+using LottaCashMummy.Shared;
 
 namespace LottaCashMummy.Table;
 

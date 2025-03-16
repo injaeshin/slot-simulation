@@ -1,4 +1,4 @@
-﻿namespace LottaCashMummy.Common;
+﻿namespace LottaCashMummy.Shared;
 
 public enum SymbolType : byte
 {

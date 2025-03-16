@@ -1,4 +1,4 @@
-using LottaCashMummy.Common;
+using Common;
 using System.Text.Json;
 
 namespace LottaCashMummy.Table;

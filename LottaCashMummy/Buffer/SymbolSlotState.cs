@@ -1,5 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
-using LottaCashMummy.Common;
+using LottaCashMummy.Shared;
 
 namespace LottaCashMummy.Buffer;
 

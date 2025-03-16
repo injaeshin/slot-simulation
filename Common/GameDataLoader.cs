@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 
+namespace Common;
 public class JsonOptions
 {
     public static JsonSerializerOptions Opt = new JsonSerializerOptions

@@ -1,4 +1,5 @@
-using LottaCashMummy.Common;
+using Common;
+using LottaCashMummy.Shared;
 using System.Text.Json;
 
 namespace LottaCashMummy.Table;
@@ -104,10 +105,10 @@ public class BaseSymbolModelParser
 
     private static GemBonusType GetGemBonusType(string name) => name switch
     {
-        "Collect" => Common.GemBonusType.Collect,
-        "Spins" => Common.GemBonusType.Spins,
-        "Symbols" => Common.GemBonusType.Symbols,
-        _ => Common.GemBonusType.None
+        "Collect" => Shared.GemBonusType.Collect,
+        "Spins" => Shared.GemBonusType.Spins,
+        "Symbols" => Shared.GemBonusType.Symbols,
+        _ => Shared.GemBonusType.None
     };
 
     private static readonly Dictionary<string, FeatureBonusType> FeatureBonusTypeMap = new()

@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 using LottaCashMummy.Buffer;
-using LottaCashMummy.Common;
+using LottaCashMummy.Shared;
 using LottaCashMummy.Table;
 
 namespace LottaCashMummy.Game;

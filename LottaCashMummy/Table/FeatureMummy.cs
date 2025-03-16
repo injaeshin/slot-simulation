@@ -1,4 +1,6 @@
 ﻿
+using Common;
+
 namespace LottaCashMummy.Table;
 
 public class MummyLevel(int level, int area, int spin, int reqGem)

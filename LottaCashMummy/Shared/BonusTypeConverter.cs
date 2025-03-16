@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace LottaCashMummy.Common;
+namespace LottaCashMummy.Shared;
 
 public static class BonusTypeConverter
 {

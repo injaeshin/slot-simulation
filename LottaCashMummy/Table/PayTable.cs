@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using Common;
+using System.Runtime.CompilerServices;
 
 namespace LottaCashMummy.Table;
 

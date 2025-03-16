@@ -3,7 +3,6 @@ using System.Data;
 
 namespace ExcelExport;
 
-
 public struct ExcelRange
 {
     public int BeginRow;
@@ -48,7 +47,7 @@ public struct ExcelRange
             // 오버플로우 체크
             if (col > (int.MaxValue - (c - 'A' + 1)) / 26)
                 throw new ArgumentException($"Column reference '{colStr}' is too large");
-            
+
             col = col * 26 + (c - 'A' + 1);
         }
 
@@ -206,29 +205,29 @@ public class ExcelReader : IDisposable
 
     private DataTable ExtractRange(DataTable sourceTable, ExcelRange range)
     {
-    DataTable result = new DataTable(sourceTable.TableName);
+        DataTable result = new DataTable(sourceTable.TableName);
 
-    // 선택된 열의 첫 번째 행 데이터를 컬럼명으로 사용
-    for (int col = range.BeginCol; col <= range.EndCol && col < sourceTable.Columns.Count; col++)
-    {
-        string columnName = sourceTable.Rows[range.BeginRow][col]?.ToString() ?? $"Column{col}";
-        result.Columns.Add(columnName);
-    }
-
-    // 첫 번째 행을 제외한 나머지 데이터 복사
-    for (int row = range.BeginRow + 1; row <= range.EndRow && row < sourceTable.Rows.Count; row++)
-    {
-        DataRow newRow = result.NewRow();
-        int newColIndex = 0;
-
+        // 선택된 열의 첫 번째 행 데이터를 컬럼명으로 사용
         for (int col = range.BeginCol; col <= range.EndCol && col < sourceTable.Columns.Count; col++)
         {
-            newRow[newColIndex++] = sourceTable.Rows[row][col];
+            string columnName = sourceTable.Rows[range.BeginRow][col]?.ToString() ?? $"Column{col}";
+            result.Columns.Add(columnName);
         }
 
-        result.Rows.Add(newRow);
-    }
+        // 첫 번째 행을 제외한 나머지 데이터 복사
+        for (int row = range.BeginRow + 1; row <= range.EndRow && row < sourceTable.Rows.Count; row++)
+        {
+            DataRow newRow = result.NewRow();
+            int newColIndex = 0;
 
-    return result;
+            for (int col = range.BeginCol; col <= range.EndCol && col < sourceTable.Columns.Count; col++)
+            {
+                newRow[newColIndex++] = sourceTable.Rows[row][col];
+            }
+
+            result.Rows.Add(newRow);
+        }
+
+        return result;
     }
 }
