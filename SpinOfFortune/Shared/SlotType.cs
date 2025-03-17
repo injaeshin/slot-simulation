@@ -3,6 +3,7 @@ namespace SpinOfFortune.Shared;
 
 public enum SymbolType
 {
+    None,
     Blank,
     Wild5x,
     Wild4x,
@@ -41,3 +42,5 @@ public enum CombinationPayType
     AnyOne2x = 2,
     Max
 }
+
+

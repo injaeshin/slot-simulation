@@ -4,6 +4,9 @@
     "data": {
         "BaseReelStrip": {
             "ReelStrip1": "B2:D62"
+        },
+        "Bonus": {
+            "BonusValue": "I2:J16"
         }
     },
     "output": "D:/Workspaces/SlotSimulation/Document/spin_of_fortune_v1_output.json"

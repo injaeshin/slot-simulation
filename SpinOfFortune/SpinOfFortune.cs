@@ -1,10 +1,8 @@
 
 using Microsoft.Extensions.Configuration;
-using SpinOfFortune.Game;
 using SpinOfFortune.Service;
 using SpinOfFortune.Shared;
 using SpinOfFortune.Statistics;
-using SpinOfFortune.Table;
 using SpinOfFortune.ThreadBuffer;
 
 namespace SpinOfFortune;
@@ -22,7 +20,7 @@ public class SpinOfFortune
     {
         tls = new ThreadLocal<ThreadStorage>(() => new ThreadStorage());
 
-        gameService = new GameService(new ReelSet(conf));
+        gameService = new GameService(conf);
         statsService = new StatsService();
     }
 
@@ -34,15 +32,16 @@ public class SpinOfFortune
         Parallel.For(0, totalBatches, options, batchIndex =>
         {
             var buffer = this.tls.Value!;
-            var currentBatchSpins = Math.Min(batchSize, totalSpins - batchIndex * (long)batchSize);
+            buffer.Clear();
 
+            var currentBatchSpins = Math.Min(batchSize, totalSpins - batchIndex * (long)batchSize);
             for (long i = 0; i < currentBatchSpins; i++)
             {
                 gameService.SimulateSingleSpin(buffer);
             }
 
-            statsService.AddBaseStatsModel(buffer.BaseStorage.Statistics);
-            buffer.BaseStorage.StatsClear();
+            statsService.AddSpinStats(buffer.SpinStats);
+            buffer.StatsClear();
 
             Interlocked.Add(ref progress, currentBatchSpins);
         });
@@ -96,7 +95,7 @@ public class SpinOfFortune
 
         Console.WriteLine($"\t\t\tCycle\t {cycle:N0}");
         Console.WriteLine();
-    }    
+    }
 
     public void PrintPayWinResult(long totalSpins)
     {
@@ -105,6 +104,7 @@ public class SpinOfFortune
         Console.WriteLine("--------------------------------");
 
         var totalWinPay = statsService.GetTotalWinPay();
+        var totalBonusPay = statsService.GetTotalBonusPay();
         var totalSpinCount = statsService.GetTotalSpinCount();
 
         List<CombinationPayType> combinationPayTypeOrder = [
@@ -119,13 +119,14 @@ public class SpinOfFortune
         {
             var amount = statsService.GetBaseGameTotalPayWinAmount(combinationPayType);
             var frequency = amount / (double)totalSpinCount;
-            Console.WriteLine($"{combinationPayType, 10} {amount,10:N0} {frequency,10:F5}");
+            Console.WriteLine($"{combinationPayType,10} {amount,10:N0} {frequency,10:F5}");
         }
 
         Console.WriteLine("--------------------------------");
 
         Console.WriteLine($"Total spins: {totalSpinCount}");
         Console.WriteLine($"Total win pay: {totalWinPay}");
+        Console.WriteLine($"Total bonus pay: {totalBonusPay}");
         Console.WriteLine($"RTP: {totalWinPay / (double)totalSpinCount:F5}");
     }
 }

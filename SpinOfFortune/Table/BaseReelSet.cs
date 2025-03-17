@@ -19,11 +19,8 @@ public class ReelSet : Base1DReelSet, IReelSet
     public List<SymbolType[]> ReelStrips => reelStrips;
     public List<int> ReelLengths => reelLengths;
 
-    public ReelSet(IConfiguration conf) : base()
+    public ReelSet(GameDataLoader kv) : base()
     {
-        var filePath = conf.GetSection("file").Value ?? throw new Exception("Reel strip path not found in configuration");
-        var kv = GameDataLoader.Read(filePath) ?? throw new Exception("Failed to load reel strip");
-
         if (!base.ReadReelStrip(1, kv))
         {
             throw new Exception("Failed to read reel strips");
@@ -38,4 +35,3 @@ public class ReelSet : Base1DReelSet, IReelSet
         }
     }
 }
-

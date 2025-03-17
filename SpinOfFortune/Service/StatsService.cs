@@ -4,25 +4,30 @@ namespace SpinOfFortune.Statistics;
 
 public class StatsService
 {
-    private List<BaseStatsModel> baseStatsModels = [];
+    private readonly List<SpinStatistics> spinStats = [];
 
-    public void AddBaseStatsModel(BaseStatsModel baseStatsModel)
+    public void AddSpinStats(SpinStatistics spinStats)
     {
-        baseStatsModels.Add(baseStatsModel);
+        this.spinStats.Add(spinStats);
     }
 
     public long GetTotalSpinCount()
     {
-        return baseStatsModels.Sum(model => model.TotalSpinCount);
+        return spinStats.Sum(model => model.TotalSpinCount);
     }
 
     public long GetTotalWinPay()
     {
-        return baseStatsModels.Sum(model => model.TotalWinPays.Values.Sum());
+        return spinStats.Sum(model => model.TotalWinPays.Values.Sum());
     }
 
     public int GetBaseGameTotalPayWinAmount(CombinationPayType combinationPayType)
     {
-        return baseStatsModels.Sum(model => model.TotalWinPays.GetValueOrDefault(combinationPayType, 0));
+        return spinStats.Sum(model => model.TotalWinPays.GetValueOrDefault(combinationPayType, 0));
+    }
+
+    public double GetTotalBonusPay()
+    {
+        return spinStats.Sum(model => model.TotalBonusPay);
     }
 }
