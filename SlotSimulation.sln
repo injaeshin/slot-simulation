@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpinOfFortune", "SpinOfFort
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{458DA23D-0DC1-4261-A7B6-4F5BAD54203F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpinOfFortune.Tests", "SpinOfFortune.Tests\SpinOfFortune.Tests.csproj", "{404F3187-9B11-4299-9244-BDA45ED62DC0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,8 +71,23 @@ Global
 		{458DA23D-0DC1-4261-A7B6-4F5BAD54203F}.Release|x64.Build.0 = Release|Any CPU
 		{458DA23D-0DC1-4261-A7B6-4F5BAD54203F}.Release|x86.ActiveCfg = Release|Any CPU
 		{458DA23D-0DC1-4261-A7B6-4F5BAD54203F}.Release|x86.Build.0 = Release|Any CPU
+		{404F3187-9B11-4299-9244-BDA45ED62DC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{404F3187-9B11-4299-9244-BDA45ED62DC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{404F3187-9B11-4299-9244-BDA45ED62DC0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{404F3187-9B11-4299-9244-BDA45ED62DC0}.Debug|x64.Build.0 = Debug|Any CPU
+		{404F3187-9B11-4299-9244-BDA45ED62DC0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{404F3187-9B11-4299-9244-BDA45ED62DC0}.Debug|x86.Build.0 = Debug|Any CPU
+		{404F3187-9B11-4299-9244-BDA45ED62DC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{404F3187-9B11-4299-9244-BDA45ED62DC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{404F3187-9B11-4299-9244-BDA45ED62DC0}.Release|x64.ActiveCfg = Release|Any CPU
+		{404F3187-9B11-4299-9244-BDA45ED62DC0}.Release|x64.Build.0 = Release|Any CPU
+		{404F3187-9B11-4299-9244-BDA45ED62DC0}.Release|x86.ActiveCfg = Release|Any CPU
+		{404F3187-9B11-4299-9244-BDA45ED62DC0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C92EDCA1-E200-426F-BF08-6573B017E7CC}
 	EndGlobalSection
 EndGlobal

@@ -27,11 +27,11 @@ public class BaseSpin
             random.Next(reelLengths[4]),
         ];
 
-        ProcessReelColumn(bs, 0, reelIndex[0], reelLengths[0], reelstrips[0]);
-        ProcessReelColumn(bs, 1, reelIndex[1], reelLengths[1], reelstrips[1]);
-        ProcessReelColumn(bs, 2, reelIndex[2], reelLengths[2], reelstrips[2]);
-        ProcessReelColumn(bs, 3, reelIndex[3], reelLengths[3], reelstrips[3]);
-        ProcessReelColumn(bs, 4, reelIndex[4], reelLengths[4], reelstrips[4]);
+        // ProcessReelColumn(bs, 0, reelIndex[0], reelLengths[0], reelstrips[0]);
+        // ProcessReelColumn(bs, 1, reelIndex[1], reelLengths[1], reelstrips[1]);
+        // ProcessReelColumn(bs, 2, reelIndex[2], reelLengths[2], reelstrips[2]);
+        // ProcessReelColumn(bs, 3, reelIndex[3], reelLengths[3], reelstrips[3]);
+        // ProcessReelColumn(bs, 4, reelIndex[4], reelLengths[4], reelstrips[4]);
 
         return bs.NormalCount > 0 || bs.GemCount > 0;
     }

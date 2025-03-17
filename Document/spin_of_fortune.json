@@ -2,9 +2,6 @@
     "name": "SpinOfFortune",
     "file": "D:/Workspaces/SlotSimulation/Document/spin_of_fortune_v1.xlsx",
     "data": {
-        "PayTable": {
-            "PayTable": "B2:D21"
-        },
         "BaseReelStrip": {
             "ReelStrip1": "B2:D62"
         }

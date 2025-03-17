@@ -5,22 +5,22 @@ namespace LottaCashMummy;
 
 public interface IBaseData
 {
-    IBaseReelSet BaseReelSet { get; }
+    IReelSet BaseReelSet { get; }
     IBaseSymbol BaseSymbol { get; }
     IPayTable PayTable { get; }
 }
 
 public class BaseData : IBaseData
 {
-    public IBaseReelSet BaseReelSet { get; }
+    public IReelSet BaseReelSet { get; }
     public IBaseSymbol BaseSymbol { get; }
     public IPayTable PayTable { get; }
 
     public BaseData(GameDataLoader kv)
     {
-        BaseReelSet = new BaseReelSet(kv);
-        BaseSymbol = new BaseSymbol(kv);
-        PayTable = new PayTable(kv);
+        //BaseReelSet = new BaseReelSet(kv);
+        //BaseSymbol = new BaseSymbol(kv);
+        //PayTable = new PayTable(kv);
     }
 }
 

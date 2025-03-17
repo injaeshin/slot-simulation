@@ -1,17 +1,17 @@
+using SpinOfFortune.Statistics;
+
 namespace SpinOfFortune.ThreadBuffer;
 
-
-public class ThreadBuffer
+public class ThreadStorage
 {
     public BaseStorage BaseStorage { get; set; }
     public BonusStorage BonusStorage { get; set; }
-    public ThreadBufferResult Result { get; set; }
+    private readonly Random random = new Random();
 
-    public ThreadBuffer()
+    public ThreadStorage()
     {
-        BaseStorage = new BaseStorage();
+        BaseStorage = new BaseStorage(random);
         BonusStorage = new BonusStorage();
-        Result = new ThreadBufferResult();
     }
 }
 

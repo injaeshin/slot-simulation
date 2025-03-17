@@ -58,8 +58,8 @@ public class Application
         var featureData = new FeatureData(kv);
         var jackpotData = new JackpotData(kv);
 
-        var (lengths, reels) = baseData.BaseReelSet.GetReelStrip(0);
-        PrintSymbolDistribution(reels);
+        //var (lengths, reels) = baseData.BaseReelSet.GetReelStrip(0);
+        //PrintSymbolDistribution(reels);
 
         sw.Restart();
 

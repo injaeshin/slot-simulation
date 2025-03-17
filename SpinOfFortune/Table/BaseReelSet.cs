@@ -1,59 +1,41 @@
 ﻿using Common;
+using Common.Table;
+using Microsoft.Extensions.Configuration;
 using SpinOfFortune.Shared;
-using System.ComponentModel;
-using System.Text.Json;
 
 namespace SpinOfFortune.Table;
 
-public interface IBaseReelSet
+public interface IReelSet
 {
-    int ReelStrip { get; }
-    (int[], SymbolType[][]) GetReelStrip(int idx);
+    public List<SymbolType[]> ReelStrips { get; }
+    public List<int> ReelLengths { get; }
 }
 
-public class BaseReelSet : IBaseReelSet
+public class ReelSet : Base1DReelSet, IReelSet
 {
-    public int ReelStrip { get; private set; } = 0;
+    private readonly List<SymbolType[]> reelStrips = [];
+    private readonly List<int> reelLengths = [];
 
-    private readonly List<SymbolType[][]> baseReelStrips;
-    private readonly List<int[]> baseReelStriptLengths;
+    public List<SymbolType[]> ReelStrips => reelStrips;
+    public List<int> ReelLengths => reelLengths;
 
-    public BaseReelSet(GameDataLoader kv)
+    public ReelSet(IConfiguration conf) : base()
     {
-        this.baseReelStrips = new List<SymbolType[][]>();
-        this.baseReelStriptLengths = new List<int[]>();
+        var filePath = conf.GetSection("file").Value ?? throw new Exception("Reel strip path not found in configuration");
+        var kv = GameDataLoader.Read(filePath) ?? throw new Exception("Failed to load reel strip");
 
-        if (!kv.TryGetValue("BaseReelStrip", out var brw))
+        if (!base.ReadReelStrip(1, kv))
         {
-            throw new Exception("BaseReelStrip not found in json object");
+            throw new Exception("Failed to read reel strips");
         }
 
-        var baseReelStrip = JsonSerializer.Deserialize<Dictionary<string, string[]>>(brw.ToString()!, JsonOptions.Opt)
-            ?? throw new Exception("Invalid BaseReelStrip format");
-
-        InitializeReelStrips(baseReelStrip);
-    }
-
-    private void InitializeReelStrips(Dictionary<string, string[]> rs)
-    {
-        var orderedReels = rs.OrderBy(kv => kv.Key).ToList();
-
-        SymbolType[][] reelStrip = new SymbolType[rs.Count][];
-        int[] reelLengths = new int[rs.Count];
-
-        for (int i = 0; i < orderedReels.Count; i++)
+        var rawReelCount = base.RawReelLengths;
+        for (int i = 0; i < rawReelCount; i++)
         {
-            reelStrip[i] = orderedReels[i].Value.Select(s => SlotConverter.ToSymbolType(s)).ToArray();
-            reelLengths[i] = reelStrip[i].Length;
+            var (rawReelLength, rawReelStrip) = base.GetRawReelStrip(i);
+            this.reelStrips.Add(rawReelStrip.Select(s => SlotConverter.ToSymbolType(s)).ToArray());
+            this.reelLengths.Add(rawReelLength);
         }
-
-        baseReelStrips.Add(reelStrip);
-        baseReelStriptLengths.Add(reelLengths);
-    }
-
-    public (int[], SymbolType[][]) GetReelStrip(int idx)
-    {
-        return (baseReelStriptLengths[idx], baseReelStrips[idx]);
     }
 }
 
