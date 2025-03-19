@@ -47,6 +47,12 @@ public class SpinOfFortune
         });
     }
 
+    public void PayTableCombination()
+    {
+        Console.WriteLine("PayTableCombination");
+        gameService.GetPayTableCombination();
+    }
+
     public void PrintSymbolDistribution()
     {
         var reels = gameService.GetRawReelStrip();
@@ -125,8 +131,7 @@ public class SpinOfFortune
         Console.WriteLine("--------------------------------");
 
         Console.WriteLine($"Total spins: {totalSpinCount}");
-        Console.WriteLine($"Total win pay: {totalWinPay}");
+        Console.WriteLine($"Total win pay: {totalWinPay} / RTP: {totalWinPay / (double)totalSpinCount:F5}");
         Console.WriteLine($"Total bonus pay: {totalBonusPay}");
-        Console.WriteLine($"RTP: {totalWinPay / (double)totalSpinCount:F5}");
     }
 }

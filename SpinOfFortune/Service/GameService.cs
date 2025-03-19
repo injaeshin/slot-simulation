@@ -30,6 +30,11 @@ public class GameService
         return reelSet.ReelStrips;
     }
 
+    public void GetPayTableCombination()
+    {
+        payTable.OutputRules();
+    }
+
     public void SimulateSingleSpin(ThreadStorage ts)
     {
         ts.SpinStats.AddSpinCount();

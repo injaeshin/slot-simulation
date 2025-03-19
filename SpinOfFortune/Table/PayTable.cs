@@ -98,9 +98,9 @@ public class PayTable
         {
             PayTableRule pay = new(true, CombinationPayType.AnyThree7);
             AddRules(pay,
-                    [SymbolType.Seven, SymbolType.SevenBar],
-                    [SymbolType.Seven, SymbolType.SevenBar],
-                    [SymbolType.Seven, SymbolType.SevenBar]);
+                    [SymbolType.Seven, SymbolType.SevenBar, SymbolType.Wild2x],
+                    [SymbolType.Seven, SymbolType.SevenBar, SymbolType.Wild5x, SymbolType.Wild4x, SymbolType.Wild3x, SymbolType.Wild2x],
+                    [SymbolType.Seven, SymbolType.SevenBar, SymbolType.Wild2x]);
         }
 
         // 2B 2B 2B
@@ -161,9 +161,9 @@ public class PayTable
         {
             PayTableRule pay = new(true, CombinationPayType.AnyThreeBar);
             AddRules(pay,
-                    [SymbolType.OneBar, SymbolType.TwoBar, SymbolType.ThreeBar, SymbolType.SevenBar],
-                    [SymbolType.OneBar, SymbolType.TwoBar, SymbolType.ThreeBar, SymbolType.SevenBar],
-                    [SymbolType.OneBar, SymbolType.TwoBar, SymbolType.ThreeBar, SymbolType.SevenBar]);
+                    [SymbolType.OneBar, SymbolType.TwoBar, SymbolType.ThreeBar, SymbolType.SevenBar, SymbolType.Wild2x],
+                    [SymbolType.OneBar, SymbolType.TwoBar, SymbolType.ThreeBar, SymbolType.SevenBar, SymbolType.Wild5x, SymbolType.Wild4x, SymbolType.Wild3x, SymbolType.Wild2x],
+                    [SymbolType.OneBar, SymbolType.TwoBar, SymbolType.ThreeBar, SymbolType.SevenBar, SymbolType.Wild2x]);
         }
 
         // Any One 5x

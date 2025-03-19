@@ -49,5 +49,3 @@ public class BonusValueModelParser
         return (symbolValues, totalWeight);
     }
 }
-
-

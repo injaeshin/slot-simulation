@@ -64,6 +64,7 @@ public class Application
             Console.WriteLine($"{percentage:F2}% ({currentProgress:N0} spins, {spinsPerSec:N0} spins/sec) / [메모리] 현재 사용량: {currentMemory}MB");
         }, null, 0, 4000);
 
+        game.PayTableCombination();
         game.Run(TOTAL_ITERATIONS, BATCH_SIZE, THREAD_COUNT);
 
         progressTimer.Dispose();
