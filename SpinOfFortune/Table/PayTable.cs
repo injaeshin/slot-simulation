@@ -78,7 +78,7 @@ public class PayTable
 
         // 7B 7B 7B
         {
-            PayTableRule pay = new(false, CombinationPayType.Three7Bar);
+            PayTableRule pay = new(true, CombinationPayType.Three7Bar);
             AddRules(pay,
                     [SymbolType.SevenBar, SymbolType.Wild2x],
                     [SymbolType.SevenBar, SymbolType.Wild5x, SymbolType.Wild4x, SymbolType.Wild3x, SymbolType.Wild2x],
@@ -205,16 +205,8 @@ public class PayTable
 
     public void OutputRules()
     {
-        var pay = 0;
         foreach (var rule in rules)
         {
-            var newPay = rule.Value.Pay;
-            if (newPay != pay)
-            {
-                Console.WriteLine();
-                pay = newPay;
-            }
-
             Console.WriteLine($"{GetSymbolTypeString(rule.Key.Item1)} {GetSymbolTypeString(rule.Key.Item2)} {GetSymbolTypeString(rule.Key.Item3)}" +
                 $" : {rule.Value.Pay * rule.Value.Multiplier}");
         }
