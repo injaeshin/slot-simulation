@@ -9,6 +9,7 @@ public record PayTableEntry(SymbolType Symbol, int Pay5, int Pay4, int Pay3);
 public class PayTable
 {
     private const SymbolType WILD = SymbolType.WW;
+    private const SymbolType SCATTER = SymbolType.SS;
 
     private readonly ImmutableDictionary<SymbolType, PayTableEntry> payTable;
 
@@ -80,7 +81,12 @@ public class PayTable
             }
         }
 
-        if (firstNonWildSymbol == null || !payTable.TryGetValue(firstNonWildSymbol.Value, out PayTableEntry? payEntry))
+        if (firstNonWildSymbol == null || firstNonWildSymbol == SCATTER)
+        {
+            return default;
+        }
+
+        if (!payTable.TryGetValue(firstNonWildSymbol.Value, out PayTableEntry? payEntry))
         {
             return default;
         }

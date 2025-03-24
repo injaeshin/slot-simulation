@@ -53,6 +53,56 @@ public class Base1DReelSet
     {
         return (rawReelLengths[idx], rawReelStrips[idx]);
     }
+
+    public void OutputSymbolDistribution()
+    {
+        var reels = rawReelStrips;
+
+        Console.WriteLine("\n심볼 분포:");
+        Console.WriteLine("\t\tReel 1\tReel 2\tReel 3\tReel 4\tReel 5");
+        Console.WriteLine(new string('-', 50));
+
+        var symbolCounts = new int[(int)SymbolType.Max, reels.Count];
+
+        // 각 릴의 심볼 카운트
+        for (int reelIndex = 0; reelIndex < reels.Count; reelIndex++)
+        {
+            foreach (var symbol in reels[reelIndex])
+            {
+                symbolCounts[(int)SlotConverter.ToSymbolType(symbol), reelIndex]++;
+            }
+        }
+
+        // 심볼별 카운트 출력
+        for (int symbolIndex = 1; symbolIndex < (int)SymbolType.Max; symbolIndex++)
+        {
+            Console.Write($"{(SymbolType)symbolIndex,-8}");
+            for (int reelIndex = 0; reelIndex < reels.Count; reelIndex++)
+            {
+                Console.Write($"\t{symbolCounts[symbolIndex, reelIndex]}");
+            }
+            Console.WriteLine();
+        }
+
+        // Total 출력
+        Console.WriteLine(new string('-', 50));
+        Console.Write("Total\t");
+        for (int reelIndex = 0; reelIndex < reels.Count; reelIndex++)
+        {
+            Console.Write($"\t{reels[reelIndex].Length}");
+        }
+        Console.WriteLine();
+
+        // Cycle 계산 및 출력
+        long cycle = 1;
+        for (int i = 0; i < reels.Count; i++)
+        {
+            cycle *= reels[i].Length;
+        }
+
+        Console.WriteLine($"\t\t\tCycle\t {cycle:N0}");
+        Console.WriteLine();
+    }
 }
 
 public class Base2DReelSet

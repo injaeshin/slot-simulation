@@ -1,21 +1,20 @@
+using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 
 using LineAndFreeGame.Common;
 using LineAndFreeGame.Service;
 using LineAndFreeGame.ThreadStorage;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace LineAndFreeGame;
 
 public class GameSimulation
 {
 #if DEBUG
-    private const int TOTAL_ITERATIONS = 100_000_000;
+    private const long TOTAL_ITERATIONS = 100_000_000;
     private static readonly int THREAD_COUNT = 1;
     private const int BATCH_SIZE = 500_000;
 #else
-    private const int TOTAL_ITERATIONS = 312_500_000;
+    private const long TOTAL_ITERATIONS = 6_272_640_000;
     private static readonly int THREAD_COUNT = Environment.ProcessorCount;
     private const int BATCH_SIZE = 500_000;
 #endif
@@ -79,7 +78,35 @@ public class GameSimulation
         });
     }
 
-    private void PrintResults() => this.gameService.PrintResults();
+    private void PrintResults()
+    {
+        Console.WriteLine("PayWinResult");
+
+        var totalWinPay = statsService.GetTotalWinPay();
+        var totalBonusPay = statsService.GetTotalBonusPay();
+        var totalSpinCount = statsService.GetTotalSpinCount();
+
+        List<SymbolType> symbolTypeOrder = [
+            SymbolType.WW, SymbolType.AA, SymbolType.BB, SymbolType.CC, SymbolType.DD, SymbolType.EE, SymbolType.FF,
+            SymbolType.GG, SymbolType.HH, SymbolType.II, SymbolType.JJ, SymbolType.SS,
+        ];
+
+        foreach (var symbolType in symbolTypeOrder)
+        {
+            for (int i = 3; i <= 5; i++)
+            {
+                var amount = statsService.GetBaseGameTotalPayWinAmount(symbolType, i);
+                var frequency = amount / (double)totalSpinCount;
+                Console.WriteLine($"{symbolType,10} {i,10} {amount,10:N0} {frequency,10:F5}");
+            }
+        }
+
+        Console.WriteLine();
+
+        Console.WriteLine($"Total spins: {totalSpinCount}");
+        Console.WriteLine($"Total win pay: {totalWinPay} / RTP: {totalWinPay / (double)totalSpinCount:F5}");
+        Console.WriteLine($"Total bonus pay: {totalBonusPay}");
+    }
 
     private void PrintSymbolDistribution() => this.gameService.PrintSymbolDistribution();
 }

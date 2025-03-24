@@ -23,7 +23,7 @@ public static class Program
             .ConfigureServices((context, services) =>
             {
                 services.AddTransient<GameSimulation>();
-                services.AddTransient<GameService>();
+                services.AddTransient<IGameService, GameService>();
                 services.AddTransient<StatsService>();
             })
             .Build();

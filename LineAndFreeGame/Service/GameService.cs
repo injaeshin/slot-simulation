@@ -34,22 +34,12 @@ public class GameService : IGameService
 
         this.payTable = new PayTable(this.dataLoader);
         this.logger = logFactory.CreateLogger<GameService>();
-        this.lineGame = new LineGame(new ReelStrip(this.dataLoader, "Base"), this.payTable, logFactory.CreateLogger<LineGame>());
+        this.lineGame = new LineGame(new ReelStrip(this.dataLoader, "BaseReelStrip"), this.payTable, logFactory.CreateLogger<LineGame>());
     }
 
-    public void SimulateSingleSpin(ThreadBuffer buffer)
-    {
-        this.lineGame.SimulateSingleSpin(buffer);
-    }
+    public void SimulateSingleSpin(ThreadBuffer buffer) => this.lineGame.SimulateSingleSpin(buffer);
 
-    public void PrintResults()
-    {
-        throw new NotImplementedException();
-    }
+    public void PrintResults() => throw new NotImplementedException();
 
-    public void PrintSymbolDistribution()
-    {
-        throw new NotImplementedException();
-    }
-
+    public void PrintSymbolDistribution() => lineGame.PrintSymbolDistribution();
 }

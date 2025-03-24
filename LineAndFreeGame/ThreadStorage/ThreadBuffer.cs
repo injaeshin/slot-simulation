@@ -11,7 +11,7 @@ public class ThreadBuffer
     private SpinStatistics spinStats = new();
     public SpinStatistics SpinStats => spinStats;
 
-    private readonly SymbolType[] symbols = new SymbolType[3 * 3];
+    private readonly SymbolType[] symbols = new SymbolType[5 * 3];
     public SymbolType[] Symbols => symbols;
 
     public int ScatterCount { get; internal set; }

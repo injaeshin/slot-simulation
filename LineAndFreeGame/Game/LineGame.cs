@@ -21,12 +21,12 @@ public class LineGame(ReelStrip reelStrip, PayTable payTable, ILogger<LineGame> 
 
         if (buf.HasBonus())
         {
-            logger.LogInformation("Bonus");
+            //logger.LogInformation("Bonus");
         }
 
         Span<SymbolType> middleSymbols = [buf.Symbols[0 * 3 + 1], buf.Symbols[1 * 3 + 1], buf.Symbols[2 * 3 + 1], buf.Symbols[3 * 3 + 1], buf.Symbols[4 * 3 + 1]];
-        var pay = payTable.CalculatePay(middleSymbols);
-        //buf.SpinStats.AddWinPay(CombinationPayType.ThreeOfAKind, pay);
+        (var symbol, var count, var pay) = payTable.CalculatePay(middleSymbols);
+        buf.SpinStats.AddWinPay(symbol, count, pay);
     }
 
     private void Spin(ThreadBuffer buffer)
@@ -68,5 +68,7 @@ public class LineGame(ReelStrip reelStrip, PayTable payTable, ILogger<LineGame> 
             buffer.ScatterCount++;
         }
     }
+
+    public void PrintSymbolDistribution() => reelStrip.OutputSymbolDistribution();
 }
 

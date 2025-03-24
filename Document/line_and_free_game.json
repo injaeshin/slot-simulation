@@ -5,11 +5,11 @@
         "Pay Table": {
             "PayTable": "B3:E15"
         },
-        "Base Reel": {
-            "BaseReelStrip": "B3:G113"
+        "Base Game Reel": {
+            "BaseReelStrip1": "C3:G113"
         },
         "Free Game Reel": {
-            "FreeGameReelStrip": "B3:G113"
+            "FreeReelStrip1": "C3:G113"
         }
     },
     "output": "D:/Workspaces/SlotSimulation/Document/line_and_free_game_v3_output.json"
