@@ -1,7 +1,6 @@
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Configuration;
 
-using Common;
 using SpinOfFortune.Shared;
 using SpinOfFortune.Table;
 using SpinOfFortune.ThreadBuffer;
@@ -21,7 +20,7 @@ public class GameService
         var filePath = conf.GetSection("file").Value ?? throw new Exception("Reel strip path not found in configuration");
         var kv = GameDataLoader.Read(filePath) ?? throw new Exception("Failed to load reel strip");
 
-        this.reelSet = new ReelSet(kv);
+        this.reelSet = new ReelSet(kv, "Base", 1);
         (this.bonusValues, this.totalWeights) = BonusValueModelParser.ReadSymbolValues("BonusValue", kv);
     }
 

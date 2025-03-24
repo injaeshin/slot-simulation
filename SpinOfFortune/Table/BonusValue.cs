@@ -1,6 +1,7 @@
 
 using System.Text.Json;
-using Common;
+using SpinOfFortune.Shared;
+
 
 namespace SpinOfFortune.Table;
 

@@ -1,0 +1,16 @@
+{
+    "name": "LineAndFreeGame",
+    "file": "D:/Workspaces/SlotSimulation/Document/line_and_free_game_v3.xlsx",
+    "data": {
+        "Pay Table": {
+            "PayTable": "B3:E15"
+        },
+        "Base Reel": {
+            "BaseReelStrip": "B3:G113"
+        },
+        "Free Game Reel": {
+            "FreeGameReelStrip": "B3:G113"
+        }
+    },
+    "output": "D:/Workspaces/SlotSimulation/Document/line_and_free_game_v3_output.json"
+}

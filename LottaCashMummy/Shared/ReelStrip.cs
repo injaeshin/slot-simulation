@@ -1,6 +1,6 @@
-ï»¿using System.Text.Json;
+using System.Text.Json;
 
-namespace Common.Table;
+namespace LottaCashMummy.Shared;
 
 public class Base1DReelSet
 {
@@ -16,11 +16,11 @@ public class Base1DReelSet
         this.rawReelLengths = [];
     }
 
-    protected bool ReadReelStrip(int reelCount, GameDataLoader kv)
+    protected bool ReadReelStrip(GameDataLoader kv, string reelSetName, int reelCount)
     {
         for (int i = 0; i < reelCount; i++)
         {
-            if (!kv.TryGetValue($"ReelStrip{i + 1}", out var rs))
+            if (!kv.TryGetValue($"{reelSetName}{i + 1}", out var rs))
             {
                 return false;
             }
@@ -36,7 +36,7 @@ public class Base1DReelSet
 
     private void InitializeReelStrips(Dictionary<string, string[]> raw)
     {
-        // ë¦´ ìˆœì„œëŒ€ë¡œ ì •ë ¬ (Reel1, Reel2, Reel3...)
+        // ¸± ¼ø¼­´ë·Î Á¤·Ä (Reel1, Reel2, Reel3...)
         var orderedReels = raw.OrderBy(kv => kv.Key).ToList();
 
         for (int i = 0; i < orderedReels.Count; i++)
@@ -87,7 +87,7 @@ public class Base2DReelSet
 
     private void InitializeReelStrips(Dictionary<string, string[]> raw)
     {
-        // ë¦´ ìˆœì„œëŒ€ë¡œ ì •ë ¬ (Reel1, Reel2, Reel3...)
+        // ¸± ¼ø¼­´ë·Î Á¤·Ä (Reel1, Reel2, Reel3...)
         var orderedReels = raw.OrderBy(kv => kv.Key).ToList();
 
         var reelStrips = new string[orderedReels.Count][];

@@ -1,6 +1,6 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 
-namespace Common;
+namespace LottaCashMummy.Shared;
 public class JsonOptions
 {
     public static JsonSerializerOptions Opt = new JsonSerializerOptions

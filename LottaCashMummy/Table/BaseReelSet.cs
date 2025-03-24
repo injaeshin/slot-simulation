@@ -1,6 +1,4 @@
-﻿using Common;
-using Common.Table;
-using LottaCashMummy.Shared;
+﻿using LottaCashMummy.Shared;
 
 namespace LottaCashMummy.Table;
 
@@ -23,7 +21,7 @@ public class ReelSet : Base1DReelSet, IReelSet
     public ReelSet(GameDataLoader kv) : base()
     {
         var reelCount = 2;
-        if (!base.ReadReelStrip(reelCount, kv))
+        if (!base.ReadReelStrip(kv, "", reelCount))
         {
             throw new Exception("Failed to read reel strips");
         }
