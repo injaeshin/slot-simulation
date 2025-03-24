@@ -38,17 +38,19 @@ public class PayTableTests
     }
 
     [Theory]
-    [InlineData(new[] { SymbolType.SS, SymbolType.SS, SymbolType.AA, SymbolType.WW, SymbolType.AA }, SymbolType.None, 0, 0)]
-    //[InlineData(new[] { SymbolType.BB, SymbolType.BB, SymbolType.BB, SymbolType.BB, SymbolType.WW }, SymbolType.BB, 5, 250)]
-    //[InlineData(new[] { SymbolType.CC, SymbolType.CC, SymbolType.CC, SymbolType.CC, SymbolType.CC }, SymbolType.CC, 5, 100)]
-    //[InlineData(new[] { SymbolType.DD, SymbolType.DD, SymbolType.DD, SymbolType.WW, SymbolType.WW }, SymbolType.DD, 5, 100)]
-    //[InlineData(new[] { SymbolType.EE, SymbolType.EE, SymbolType.EE, SymbolType.EE, SymbolType.EE }, SymbolType.EE, 5, 80)]
-    //[InlineData(new[] { SymbolType.WW, SymbolType.FF, SymbolType.FF, SymbolType.CC, SymbolType.DD }, SymbolType.FF, 3,  5)]
-    //[InlineData(new[] { SymbolType.GG, SymbolType.GG, SymbolType.WW, SymbolType.GG, SymbolType.GG }, SymbolType.GG, 5, 25)]
-    //[InlineData(new[] { SymbolType.HH, SymbolType.HH, SymbolType.HH, SymbolType.HH, SymbolType.HH }, SymbolType.HH, 5, 25)]
-    //[InlineData(new[] { SymbolType.II, SymbolType.II, SymbolType.II, SymbolType.II, SymbolType.II }, SymbolType.II, 5, 25)]
-    //[InlineData(new[] { SymbolType.JJ, SymbolType.JJ, SymbolType.JJ, SymbolType.JJ, SymbolType.JJ }, SymbolType.JJ, 5, 25)]
-    //[InlineData(new[] { SymbolType.SS, SymbolType.SS, SymbolType.SS, SymbolType.SS, SymbolType.SS }, SymbolType.SS, 5, 20)]
+    /*
+     * [InlineData(new[] { "BB", "BB", "BB" }, 3, 20)]  // 기본 3매칭
+        [InlineData(new[] { "WW", "BB", "BB" }, 3, 20)]  // 중복 앞쪽
+        [InlineData(new[] { "BB", "WW", "BB" }, 3, 20)]  // 추가 앞쪽
+        [InlineData(new[] { "BB", "BB", "WW" }, 3, 20)]  // 중복 중간
+    */
+    [InlineData(new[] { SymbolType.BB, SymbolType.BB, SymbolType.BB, SymbolType.CC, SymbolType.WW }, SymbolType.BB, 3, 20)]
+    [InlineData(new[] { SymbolType.WW, SymbolType.BB, SymbolType.BB, SymbolType.CC, SymbolType.CC }, SymbolType.BB, 3, 20)]
+    [InlineData(new[] { SymbolType.BB, SymbolType.WW, SymbolType.BB, SymbolType.CC, SymbolType.WW }, SymbolType.BB, 3, 20)]
+    [InlineData(new[] { SymbolType.BB, SymbolType.BB, SymbolType.WW, SymbolType.CC, SymbolType.CC }, SymbolType.BB, 3, 20)]
+    [InlineData(new[] { SymbolType.WW, SymbolType.WW, SymbolType.BB, SymbolType.CC, SymbolType.CC }, SymbolType.BB, 3, 20)] // 와일드 2개 + BB 1개 (앞쪽)
+    [InlineData(new[] { SymbolType.WW, SymbolType.BB, SymbolType.WW, SymbolType.CC, SymbolType.CC }, SymbolType.BB, 3, 20)] // 와일드 2개 + BB 1개 (중간)
+    [InlineData(new[] { SymbolType.BB, SymbolType.WW, SymbolType.WW, SymbolType.CC, SymbolType.CC }, SymbolType.BB, 3, 20)] // BB 1개 + 와일드 2개 (뒤쪽)
     public void CalculatePay_ShouldReturnCorrectPay_WhenValidSymbolsProvided(SymbolType[] symbols, SymbolType expectedSymbol, int expectedCount, int expectedPay)
     {
         // Arrange

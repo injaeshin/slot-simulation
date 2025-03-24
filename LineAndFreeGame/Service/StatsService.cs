@@ -31,4 +31,12 @@ public class StatsService
     {
         return spinStats.Sum(model => model.TotalBonusPay);
     }
+
+    // bbsymbol write to file with csv format
+    public void WriteBBSymbolToFile()
+    {
+        var filePath = "bbsymbol.csv";
+        var csvContent = string.Join("\n", spinStats.SelectMany(model => model.BBSymbols.Select(symbol => $"{symbol.Item1},{symbol.Item2},{symbol.Item3},{symbol.Item4},{symbol.Item5}")));
+        File.WriteAllText(filePath, csvContent);
+    }
 }

@@ -10,9 +10,9 @@ namespace LineAndFreeGame;
 public class GameSimulation
 {
 #if DEBUG
-    private const long TOTAL_ITERATIONS = 100_000_000;
-    private static readonly int THREAD_COUNT = 1;
-    private const int BATCH_SIZE = 500_000;
+    private const long TOTAL_ITERATIONS = 6_272_640_000;
+    private static readonly int THREAD_COUNT = 6;
+    private const int BATCH_SIZE = 1_500_000;
 #else
     private const long TOTAL_ITERATIONS = 6_272_640_000;
     private static readonly int THREAD_COUNT = Environment.ProcessorCount;
@@ -106,6 +106,8 @@ public class GameSimulation
         Console.WriteLine($"Total spins: {totalSpinCount}");
         Console.WriteLine($"Total win pay: {totalWinPay} / RTP: {totalWinPay / (double)totalSpinCount:F5}");
         Console.WriteLine($"Total bonus pay: {totalBonusPay}");
+
+        //statsService.WriteBBSymbolToFile();
     }
 
     private void PrintSymbolDistribution() => this.gameService.PrintSymbolDistribution();

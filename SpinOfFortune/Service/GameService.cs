@@ -70,21 +70,17 @@ public class GameService
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void ProcessReelColumn(ThreadStorage ts, int col, int startIndex, int reelLength, SymbolType[] strip)
     {
-        ProcessReelRow(ts, col, 0, startIndex, reelLength, strip);
-        ProcessReelRow(ts, col, 1, startIndex + 1, reelLength, strip);
-        ProcessReelRow(ts, col, 2, startIndex + 2, reelLength, strip);
+        var baseIndex = col * 3;
+        ProcessReelRow(ts, baseIndex, 0, startIndex, reelLength, strip);
+        ProcessReelRow(ts, baseIndex, 1, startIndex + 1, reelLength, strip);
+        ProcessReelRow(ts, baseIndex, 2, startIndex + 2, reelLength, strip);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void ProcessReelRow(ThreadStorage ts, int col, int row, int pos, int reelLength, SymbolType[] strip)
+    private static void ProcessReelRow(ThreadStorage ts, int baseIndex, int row, int pos, int reelLength, SymbolType[] strip)
     {
         pos = pos >= reelLength ? pos - reelLength : pos;
-        var symbol = strip[pos];
-        ts.Symbols[col * 3 + row] = symbol;
-
-        if (symbol == SymbolType.Bonus)
-        {
-            ts.BonusCount++;
-        }
+        ts.Symbols[baseIndex + row] = strip[pos];
+        ts.BonusCount += strip[pos] == SymbolType.Bonus ? 1 : 0;
     }
 }
