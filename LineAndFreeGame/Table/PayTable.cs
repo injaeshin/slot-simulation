@@ -11,7 +11,7 @@ public class PayTable
     private const SymbolType WILD = SymbolType.WW;
     private const SymbolType SCATTER = SymbolType.SS;
 
-    private readonly ImmutableDictionary<SymbolType, PayTableEntry> payTable;
+    private readonly ImmutableDictionary<SymbolType, PayTableEntry> payTable;    
 
     public PayTable(GameDataLoader kv)
     {
@@ -100,5 +100,26 @@ public class PayTable
         };
 
         return (payEntry.Symbol, consecutiveCount, pay);
+    }
+
+    public int GetFreeSpinCount(int bonusSymbolCount)
+    {
+        if (bonusSymbolCount < 3)
+        {
+            return 0;
+        }
+
+        if (!payTable.TryGetValue(SCATTER, out PayTableEntry? payEntry))
+        {
+            return 0;
+        }
+
+        return bonusSymbolCount switch
+        {
+            5 => payEntry.Pay5,
+            4 => payEntry.Pay4,
+            3 => payEntry.Pay3,
+            _ => 0
+        };
     }
 }

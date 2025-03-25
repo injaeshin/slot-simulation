@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using Microsoft.Extensions.Logging;
 
 using LineAndFreeGame.Common;
 using LineAndFreeGame.Table;
@@ -7,33 +6,54 @@ using LineAndFreeGame.ThreadStorage;
 
 namespace LineAndFreeGame.Game;
 
-public class LineGame(ReelStrip reelStrip, PayTable payTable, ILogger<LineGame> log)
+public class BaseGame
 {
-    private readonly ILogger<LineGame> logger = log;
-    private readonly ReelStrip reelStrip = reelStrip;
-    private readonly PayTable payTable = payTable;
+    private readonly ReelStrip reelStrip;
+    private readonly PayTable payTable;
+    private readonly FreeGame freeGame;
 
-    public void SimulateSingleSpin(ThreadBuffer buf)
+    public BaseGame(GameDataLoader kv, PayTable payTable)
     {
-        buf.SpinStats.AddSpinCount();
+        this.reelStrip = new ReelStrip(kv, "BaseReelStrip");
+        this.payTable = payTable;
+
+        this.freeGame = new FreeGame(kv, payTable);
+    }
+
+    public async Task SimulateSingleSpin(ThreadBuffer buf)
+    {
+        buf.LineGameClear();
+        buf.SpinStats.AddLineSpinCount();
 
         Spin(buf);
 
-        if (buf.HasBonus())
+        var scatterCount = buf.GetLineScatterCount();
+        if (scatterCount >= 3)
         {
-            //logger.LogInformation("Bonus");
+            buf.SpinStats.AddFreeSpinTriggerCount();
+            buf.SpinStats.AddLineScatterCount(scatterCount);
+
+            var initFreeSpin = payTable.GetFreeSpinCount(scatterCount);
+            await freeGame.ExecuteAsync(buf, initFreeSpin);
         }
 
-        Span<SymbolType> middleSymbols = [buf.Symbols[0 * 3 + 1], buf.Symbols[1 * 3 + 1], buf.Symbols[2 * 3 + 1], buf.Symbols[3 * 3 + 1], buf.Symbols[4 * 3 + 1]];
-        (var symbol, var count, var pay) = payTable.CalculatePay(middleSymbols);
+        var (symbol, count, pay) = CalculateMiddleLinePay(buf);
+        if (pay > 0)
+        {
+            buf.SpinStats.AddLineGameWinPay(symbol, count, pay);
+        }
 
-        //if (symbol == SymbolType.BB && count == 3)
-        //{
-        //    buf.SpinStats.AddBBSymbol(middleSymbols, pay);
-        //}
+        await Task.CompletedTask;
+    }
 
-
-        buf.SpinStats.AddWinPay(symbol, count, pay);
+    private (SymbolType symbol, int count, int pay) CalculateMiddleLinePay(ThreadBuffer buf)
+    {
+        Span<SymbolType> middleSymbols = [
+            buf.LineGameSymbols[0 * 3 + 1], buf.LineGameSymbols[1 * 3 + 1],
+            buf.LineGameSymbols[2 * 3 + 1], buf.LineGameSymbols[3 * 3 + 1],
+            buf.LineGameSymbols[4 * 3 + 1]
+        ];
+        return payTable.CalculatePay(middleSymbols);
     }
 
     private void Spin(ThreadBuffer buffer)
@@ -69,10 +89,14 @@ public class LineGame(ReelStrip reelStrip, PayTable payTable, ILogger<LineGame> 
     {
         pos = pos >= reelLength ? pos - reelLength : pos;
         var symbol = strip[pos];
-        buffer.Symbols[baseIndex + row] = symbol;
-        buffer.ScatterCount += symbol == SymbolType.SS ? 1 : 0;
+        buffer.LineGameSymbols[baseIndex + row] = symbol;
     }
 
-    public void PrintSymbolDistribution() => reelStrip.OutputSymbolDistribution();
-}
+    public void PrintSymbolDistribution()
+    {
+        Console.WriteLine("Symbol distribution: Base Game");
+        reelStrip.OutputSymbolDistribution();
 
+        freeGame.PrintSymbolDistribution();
+    }
+}

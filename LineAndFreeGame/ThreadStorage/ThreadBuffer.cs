@@ -11,16 +11,47 @@ public class ThreadBuffer
     private SpinStatistics spinStats = new();
     public SpinStatistics SpinStats => spinStats;
 
-    private readonly SymbolType[] symbols = new SymbolType[5 * 3];
-    public SymbolType[] Symbols => symbols;
+    private readonly SymbolType[] lineGameSymbols = new SymbolType[5 * 3];
+    public SymbolType[] LineGameSymbols => lineGameSymbols;
 
-    public int ScatterCount { get; internal set; }
-    public bool HasBonus() => ScatterCount >= 3;
+    private readonly SymbolType[] freeGameSymbols = new SymbolType[5 * 3];
+    public SymbolType[] FreeGameSymbols => freeGameSymbols;
 
-    public void Clear()
+    public int GetLineScatterCount()
     {
-        Array.Clear(symbols);
-        ScatterCount = 0;
+        var scatterCount = 0;
+        for (int i = 0; i < lineGameSymbols.Length; i++)
+        {
+            if (lineGameSymbols[i] == SymbolType.SS)
+            {
+                scatterCount++;
+            }
+        }
+
+        return scatterCount;
+    }
+
+    public int GetFreeScatterCount()
+    {
+        var scatterCount = 0;
+        for (int i = 0; i < freeGameSymbols.Length; i++)
+        {
+            if (freeGameSymbols[i] == SymbolType.SS)
+            {
+                scatterCount++;
+            }
+        }
+        return scatterCount;
+    }
+
+    public void LineGameClear()
+    {
+        Array.Clear(lineGameSymbols);
+    }
+    
+    public void FreeClear()
+    {
+        Array.Clear(freeGameSymbols);
     }
 
     public void StatsClear() => spinStats = new();

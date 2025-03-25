@@ -36,12 +36,12 @@ public class GameDataLoader : Dictionary<string, object>
             Console.WriteLine($"JSON Path: {jsonEx.Path}");
             Console.WriteLine($"JSON Line Number: {jsonEx.LineNumber}");
             Console.WriteLine($"JSON Byte Position: {jsonEx.BytePositionInLine}");
-            return null;
+            throw new Exception($"JSON Error: {jsonEx.Message}");
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error loading JSON file: {ex.Message}");
-            return null;
+            throw new Exception($"Error loading JSON file: {ex.Message}");
         }
     }
 }

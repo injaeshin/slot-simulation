@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Logging;
-
 using LineAndFreeGame.Common;
 using LineAndFreeGame.Game;
 using LineAndFreeGame.Table;
@@ -10,36 +8,34 @@ namespace LineAndFreeGame.Service;
 
 public interface IGameService
 {
-    void PrintResults();
+    Task SimulateSingleSpin(ThreadBuffer buffer);
     void PrintSymbolDistribution();
-    void SimulateSingleSpin(ThreadBuffer buffer);
 }
 
 public class GameService : IGameService
 {
-    private readonly ILogger<GameService> logger;
-
     private readonly PayTable payTable;
-    private readonly LineGame lineGame;
-    private readonly GameDataLoader dataLoader;
+    private readonly BaseGame baseGame;
+    private readonly FreeGame freeGame;
 
-    public GameService(IConfiguration conf, ILoggerFactory logFactory)
+    public GameService(IConfiguration conf)
     {
         var filePath = conf.GetSection("file").Value ?? throw new Exception("Reel strip path not found in configuration");
-        this.dataLoader = GameDataLoader.Read(filePath) ?? throw new Exception("Failed to load reel strip");
-        if (this.dataLoader == null)
-        {
-            throw new Exception("Failed to load reel strip");
-        }
+        var dataLoader = GameDataLoader.Read(filePath) ?? throw new Exception("Failed to load reel strip");
 
-        this.payTable = new PayTable(this.dataLoader);
-        this.logger = logFactory.CreateLogger<GameService>();
-        this.lineGame = new LineGame(new ReelStrip(this.dataLoader, "BaseReelStrip"), this.payTable, logFactory.CreateLogger<LineGame>());
+        this.payTable = new PayTable(dataLoader);
+        this.baseGame = new BaseGame(dataLoader, this.payTable);
+        this.freeGame = new FreeGame(dataLoader, this.payTable);
     }
 
-    public void SimulateSingleSpin(ThreadBuffer buffer) => this.lineGame.SimulateSingleSpin(buffer);
+    public async Task SimulateSingleSpin(ThreadBuffer buffer)
+    {
+        await this.baseGame.SimulateSingleSpin(buffer);
+        //await this.freeGame.ExecuteAsync(buffer, 1);
+    }
 
-    public void PrintResults() => throw new NotImplementedException();
-
-    public void PrintSymbolDistribution() => lineGame.PrintSymbolDistribution();
+    public void PrintSymbolDistribution()
+    {
+        baseGame.PrintSymbolDistribution();
+    }
 }

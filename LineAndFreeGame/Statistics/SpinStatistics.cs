@@ -4,35 +4,75 @@ namespace LineAndFreeGame.Statistics;
 
 public class SpinStatistics
 {
-    private long totalSpinCount;
-    public long TotalSpinCount => totalSpinCount;
+    private long totalLineSpinCount;
+    public long TotalBaseSpinCount => totalLineSpinCount;
 
-    private readonly Dictionary<(SymbolType, int), int> totalWinPays = [];
-    public Dictionary<(SymbolType, int), int> TotalWinPays => totalWinPays;
+    private readonly Dictionary<(SymbolType, int), int> lineGameWinPays = [];
+    public Dictionary<(SymbolType, int), int> LineGameWinPays => lineGameWinPays;
 
-    private readonly List<(SymbolType, SymbolType, SymbolType, SymbolType, SymbolType)> bBSymbols = [];
-    public List<(SymbolType, SymbolType, SymbolType, SymbolType, SymbolType)> BBSymbols => bBSymbols;
+    private byte lineScatter3Count;
+    private byte lineScatter4Count;
+    private byte lineScatter5Count;
 
-    private double totalBonusPay;
-    public double TotalBonusPay => totalBonusPay;
+    public byte LineScatter3Count => lineScatter3Count;
+    public byte LineScatter4Count => lineScatter4Count;
+    public byte LineScatter5Count => lineScatter5Count;
 
-    public void AddSpinCount()
+    private long totalFreeSpinTriggerCount;
+    public long TotalFreeSpinTriggerCount => totalFreeSpinTriggerCount;
+
+    private readonly Dictionary<(SymbolType, int), int> totalFreeGameWinPays = [];
+    public Dictionary<(SymbolType, int), int> TotalFreeGameWinPays => totalFreeGameWinPays;
+
+    private readonly List<(byte, int)> totalFreeSpinExecutions = [];
+    public List<(byte, int)> TotalFreeSpinExecutions => totalFreeSpinExecutions;
+
+    private long totalFreeSpinCount;
+    public long TotalFreeSpinCount => totalFreeSpinCount;
+
+    public void AddLineSpinCount()
     {
-        totalSpinCount++;
+        totalLineSpinCount++;
     }
 
-    public void AddWinPay(SymbolType symbol, int count, int winPay)
+    public void AddLineGameWinPay(SymbolType symbol, int count, int winPay)
     {
-        totalWinPays[(symbol, count)] = totalWinPays.GetValueOrDefault((symbol, count), 0) + winPay;
+        lineGameWinPays[(symbol, count)] = lineGameWinPays.GetValueOrDefault((symbol, count), 0) + winPay;
     }
 
-    public void AddBonusPay(double bonusPay)
+    public void AddLineScatterCount(int count)
     {
-        totalBonusPay += bonusPay;
+        switch (count)
+        {
+            case 3:
+                lineScatter3Count++;
+                break;
+            case 4:
+                lineScatter4Count++;
+                break;
+            case 5:
+                lineScatter5Count++;
+                break;
+        }
     }
 
-    public void AddBBSymbol(Span<SymbolType> middleSymbols, int pay)
+    public void AddFreeSpinTriggerCount()
     {
-        bBSymbols.Add((middleSymbols[0], middleSymbols[1], middleSymbols[2], middleSymbols[3], middleSymbols[4]));
+        totalFreeSpinTriggerCount++;
+    }
+
+    public void AddFreeSpinCount()
+    {
+        totalFreeSpinCount++;
+    }
+
+    public void AddFreeGameWinPay(SymbolType symbol, int count, int winPay)
+    {
+        totalFreeGameWinPays[(symbol, count)] = totalFreeGameWinPays.GetValueOrDefault((symbol, count), 0) + winPay;
+    }
+
+    public void AddExecFreeSpinCount(int initFreeSpin, int execSpinCount)
+    {
+        totalFreeSpinExecutions.Add(((byte)initFreeSpin, execSpinCount));
     }
 }

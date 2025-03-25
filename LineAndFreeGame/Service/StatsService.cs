@@ -10,33 +10,63 @@ public class StatsService
     public void AddSpinStats(SpinStatistics spinStats)
     {
         this.spinStats.Add(spinStats);
+        
     }
 
-    public long GetTotalSpinCount()
+    public long GetTotalBaseSpinCount()
     {
-        return spinStats.Sum(model => model.TotalSpinCount);
+        return spinStats.Sum(model => model.TotalBaseSpinCount);
     }
 
-    public long GetTotalWinPay()
+    public long GetTotalFreeGameTriggerCount()
     {
-        return spinStats.Sum(model => model.TotalWinPays.Values.Sum());
+        return spinStats.Sum(model => model.TotalFreeSpinTriggerCount);
     }
 
-    public int GetBaseGameTotalPayWinAmount(SymbolType symbolType, int count)
+    public long GetTotalBaseGameWinPay()
     {
-        return spinStats.Sum(model => model.TotalWinPays.GetValueOrDefault((symbolType, count), 0));
+        return spinStats.Sum(model => model.LineGameWinPays.Values.Sum());
     }
 
-    public double GetTotalBonusPay()
+    public long GetTotalFreeGameWinPay()
     {
-        return spinStats.Sum(model => model.TotalBonusPay);
+        return spinStats.Sum(model => model.TotalFreeGameWinPays.Values.Sum());
     }
 
-    // bbsymbol write to file with csv format
-    public void WriteBBSymbolToFile()
+    public int GetLineGameTotalPayWinAmount(SymbolType symbolType, int count)
     {
-        var filePath = "bbsymbol.csv";
-        var csvContent = string.Join("\n", spinStats.SelectMany(model => model.BBSymbols.Select(symbol => $"{symbol.Item1},{symbol.Item2},{symbol.Item3},{symbol.Item4},{symbol.Item5}")));
-        File.WriteAllText(filePath, csvContent);
+        return spinStats.Sum(model => model.LineGameWinPays.GetValueOrDefault((symbolType, count), 0));
+    }
+
+    public int GetFreeGameTotalPayWinAmount(SymbolType symbolType, int count)
+    {
+        return spinStats.Sum(model => model.TotalFreeGameWinPays.GetValueOrDefault((symbolType, count), 0));
+    }
+
+    public double GetAvgFreeSpinExecutions(int initSpin)
+    {
+        // 전체 스핀 실행 수
+        var totalExecutions = spinStats.Sum(model => model.TotalFreeSpinCount);
+
+        // 프리스핀 실행 수
+        var totalFreeSpinExecutions = spinStats.Sum(model => model.TotalFreeSpinExecutions.Where(v => v.Item1 == initSpin).Sum(v => v.Item2));
+
+        return totalFreeSpinExecutions / totalExecutions;
+    }
+
+    public long GetTotalFreeSpinCount()
+    {
+        return spinStats.Sum(model => model.TotalFreeSpinCount);
+    }
+
+    public long GetLineScatterCount(int count)
+    {
+        return spinStats.Sum(model => count switch
+        {
+            3 => model.LineScatter3Count,
+            4 => model.LineScatter4Count,
+            5 => model.LineScatter5Count,
+            _ => 0
+        });
     }
 }
