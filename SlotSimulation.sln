@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LottaCashMummy", "LottaCashMummy\LottaCashMummy.csproj", "{39500F69-06A3-4B93-A273-ED67C4860D7D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoMoMummy", "MoMoMummy\MoMoMummy.csproj", "{39500F69-06A3-4B93-A273-ED67C4860D7D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelExport", "ExcelExporter\ExcelExport.csproj", "{9DDBC4DB-3FDA-4F60-A9DD-0986515D9745}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpinOfFortune", "SpinOfFortune\SpinOfFortune.csproj", "{BC84171A-74F6-4A07-89A5-2CAE3AD5657F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WheelOfFortune", "WheelOfFortune\WheelOfFortune.csproj", "{BC84171A-74F6-4A07-89A5-2CAE3AD5657F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpinOfFortune.Tests", "SpinOfFortune.Tests\SpinOfFortune.Tests.csproj", "{404F3187-9B11-4299-9244-BDA45ED62DC0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WheelOfFortune.Tests", "WheelOfFortune.Tests\WheelOfFortune.Tests.csproj", "{404F3187-9B11-4299-9244-BDA45ED62DC0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LineAndFreeGame", "LineAndFreeGame\LineAndFreeGame.csproj", "{87994E61-814E-4716-8A39-061029CADA90}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LineAndFree", "LineAndFreeGame\LineAndFree.csproj", "{87994E61-814E-4716-8A39-061029CADA90}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tool", "Tool", "{C8D5274F-AC00-46C7-1F8D-E88E81087A52}"
 EndProject
