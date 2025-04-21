@@ -1,20 +1,20 @@
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 
-using LineAndFreeGame.Common;
-using LineAndFreeGame.Service;
-using LineAndFreeGame.ThreadStorage;
+using LineAndFree.Shared;
+using LineAndFree.Service;
+using LineAndFree.ThreadStorage;
 
-namespace LineAndFreeGame;
+namespace LineAndFree;
 
 public class GameSimulation
 {
 #if DEBUG
-    private const long TOTAL_ITERATIONS = 200_000_000;
+    private const long TOTAL_ITERATIONS = 100_000_000;
     private static readonly int THREAD_COUNT = Environment.ProcessorCount;
-    private const int BATCH_SIZE = 1_500_000;
+    private const int BATCH_SIZE = 1_000_000;
 #else
-    private const long TOTAL_ITERATIONS = 6_272_640_000;
+    private const long TOTAL_ITERATIONS = 15_000_000_000;
     private static readonly int THREAD_COUNT = Environment.ProcessorCount;
     private const int BATCH_SIZE = 2_500_000;
 #endif
@@ -41,6 +41,7 @@ public class GameSimulation
         Console.WriteLine($"Total spins: {TOTAL_ITERATIONS:N0}");
         Console.WriteLine("Progress: ");
 
+        PrintReelStrip();
         PrintSymbolDistribution();
 
         using (var progressReporter = new ProgressReporter(TOTAL_ITERATIONS, sw))
@@ -50,7 +51,9 @@ public class GameSimulation
             progressReporter.PrintFinalStats(sw);
         }
 
-        PrintBaseResults();
+        Console.WriteLine();
+        PrintBaseGameResult();
+        PrintFreeGameResult();
     }
 
     private async Task SimulateGameAsync(ProgressReporter progressReporter)
@@ -76,79 +79,105 @@ public class GameSimulation
         );
     }
 
-    private void PrintBaseResults()
+    private void PrintBaseGameResult()
     {
+        List<int> scatters = [3, 4, 5];
         List<SymbolType> symbolTypeOrder = [
-            SymbolType.WW, SymbolType.AA, SymbolType.BB, SymbolType.CC, SymbolType.DD, SymbolType.EE, SymbolType.FF,
-            SymbolType.GG, SymbolType.HH, SymbolType.II, SymbolType.JJ, SymbolType.SS,
+            SymbolType.AA, SymbolType.BB, SymbolType.CC, SymbolType.DD, SymbolType.EE, SymbolType.FF,
+            SymbolType.GG, SymbolType.HH, SymbolType.II, SymbolType.JJ,
         ];
 
-        Console.WriteLine("PayWinResult - Base Game");
-
-        var totalBaseSpinCount = statsService.GetTotalBaseSpinCount();
-        var totalWinPayAmount = statsService.GetTotalBaseGameWinPay();
-
-        for (int i = 5; i >= 3; i--)
-        {
-            foreach (var symbolType in symbolTypeOrder)
-            {
-                var amount = statsService.GetLineGameTotalPayWinAmount(symbolType, i);
-                var frequency = amount / (double)totalBaseSpinCount;
-                Console.WriteLine($"{symbolType,10} {i,10} {amount,10:N0} {frequency,10:F5}");
-            }
-        }
-
         Console.WriteLine();
-
-        Console.WriteLine("ScatterCount - Base Game");
-        for (int i = 5; i >= 3; i--)
-        {
-            var hits = statsService.GetLineScatterCount(i);
-            var frequency = hits / (double)totalBaseSpinCount;
-            Console.WriteLine($"SS - {i,10} {hits,10:N0} {frequency,10:F5}");
-        }
-
-        var totalTriggerCount = statsService.GetTotalFreeGameTriggerCount();
-        Console.WriteLine($"Total trigger count: {totalTriggerCount:N0} / Frequency: {totalTriggerCount / (double)totalBaseSpinCount:F5}");
+        Console.WriteLine("PayWinResult - Base Game");
+        Console.WriteLine();
+        var totalBaseSpinCount = statsService.GetBaseGameTotalSpinCount();
+        var totalTriggerCount = statsService.GetBaseGameTotalWinCountWithScatter();
 
         Console.WriteLine($"Total base spins: {totalBaseSpinCount}");
-        Console.WriteLine($"Total base win pay: {totalWinPayAmount} / RTP: {totalWinPayAmount / (double)totalBaseSpinCount:F5}");
 
-        Console.WriteLine("\nPayWinResult - Free Game");
-
-        var totalFreeSpinCount = statsService.GetTotalFreeSpinCount();
-        var totalFreeWinPayAmount = statsService.GetTotalFreeGameWinPay();
-
+        long totalBaseWinAmount = 0;
         for (int i = 5; i >= 3; i--)
         {
             foreach (var symbolType in symbolTypeOrder)
             {
-                var amount = statsService.GetFreeGameTotalPayWinAmount(symbolType, i);
-                var frequency = amount / (double)totalFreeSpinCount;
-                Console.WriteLine($"{symbolType,10} {i,10} {amount,10:N0} {frequency,10:F5}");
+                var baseWinPayAmount = statsService.GetBaseGameTotalWinPayAmount(symbolType, i);
+                var frequency = totalBaseSpinCount > 0 ? baseWinPayAmount / (double)totalBaseSpinCount : 0;
+                Console.WriteLine($"{symbolType,10} {i,10} {baseWinPayAmount,10:N0} {frequency:F5}");
+
+                totalBaseWinAmount += baseWinPayAmount;
+            }
+        }
+
+        Console.WriteLine($"Total trigger count: {totalTriggerCount}");
+
+        foreach (var scatter in scatters)
+        {
+            var baseHitsWinWithScatter = statsService.GetBaseGameTotalWinCountWithScatter(scatter);
+            var frequency = baseHitsWinWithScatter > 0 ? baseHitsWinWithScatter / (double)totalBaseSpinCount : 0;
+            Console.WriteLine($"{scatter,10} {baseHitsWinWithScatter,10:N0} {frequency:F5}");
+        }
+
+        var baseGameRTP = (double)totalBaseWinAmount / totalBaseSpinCount;
+        Console.WriteLine($"Base Game RTP: {baseGameRTP:F5}");
+    }
+
+    private void PrintFreeGameResult()
+    {
+        List<int> scatters = [3, 4, 5];
+        List<SymbolType> symbolTypeOrder = [
+            SymbolType.AA, SymbolType.BB, SymbolType.CC, SymbolType.DD, SymbolType.EE, SymbolType.FF,
+            SymbolType.GG, SymbolType.HH, SymbolType.II, SymbolType.JJ,
+        ];
+
+        Console.WriteLine();
+        Console.WriteLine("PayWinResult - Free Game");
+        Console.WriteLine();
+        var totalFreeSpinCount = statsService.GetFreeGameTotalSpinCount();
+        Console.WriteLine($"Total free spins: {totalFreeSpinCount}");
+
+        long totalFreeWinAmount = 0;
+        for (int i = 5; i >= 3; i--)
+        {
+            foreach (var symbolType in symbolTypeOrder)
+            {
+                var freeWinPayAmount = statsService.GetFreeGameWinPayAmount(symbolType, i);
+                var frequency = freeWinPayAmount > 0 ? freeWinPayAmount / (double)totalFreeSpinCount : 0;
+                Console.WriteLine($"{symbolType,10} {i,10} {freeWinPayAmount,10:N0} {frequency:F5}");
+
+                totalFreeWinAmount += freeWinPayAmount;
             }
         }
 
         Console.WriteLine();
+        foreach (var scatter in scatters)
+        {
+            var freeHitsWinWithScatter = statsService.GetFreeGameWinCountWithScatter(scatter);
+            var frequency = freeHitsWinWithScatter > 0 ? freeHitsWinWithScatter / (double)totalFreeSpinCount : 0;
+            Console.WriteLine($"{scatter,10} {freeHitsWinWithScatter,10:N0} {frequency:F5}");
+        }
 
-        Console.WriteLine($"Total free spins: {totalFreeSpinCount}");
-        Console.WriteLine($"Total free win pay: {totalFreeWinPayAmount} / RTP: {totalFreeWinPayAmount / (double)totalFreeSpinCount:F5}");
+        var freeRetriggerCountWithScatter = statsService.GetAllFreeGameRetriggerStats();
+        foreach (var scatter in scatters)
+        {
+            var retriggerCount = freeRetriggerCountWithScatter[scatter];
+            Console.WriteLine($"Free Game retrigger count with scatter {scatter}");
+            foreach (var retrigger in retriggerCount)
+            {
+                Console.WriteLine($"  Retrigger {retrigger.Key}: {retrigger.Value}");
+            }
+        }
 
-        Console.WriteLine();
+        // 프리 게임의 일반 심볼 RTP
+        var freeGameSymbolRTP = (double)totalFreeWinAmount / totalFreeSpinCount;
+        Console.WriteLine($"Free Game Symbol RTP: {freeGameSymbolRTP:F5}");
 
-        // // 평균 스핀 수 (10, 15, 20)
-        // var freeGameAvgSpinCount10 = statsService.GetAvgFreeSpinExecutions(10);
-        // var freeGameAvgSpinCount15 = statsService.GetAvgFreeSpinExecutions(15);
-        // var freeGameAvgSpinCount20 = statsService.GetAvgFreeSpinExecutions(20);
-
-        // Console.WriteLine($"FreeGameAvgSpinCount - initSpin: 10, avgSpinCount: {freeGameAvgSpinCount10}");
-        // Console.WriteLine($"FreeGameAvgSpinCount - initSpin: 15, avgSpinCount: {freeGameAvgSpinCount15}");
-        // Console.WriteLine($"FreeGameAvgSpinCount - initSpin: 20, avgSpinCount: {freeGameAvgSpinCount20}");
-
-        // 3개의 평균
-        //var freeGameAvgSpinCount = (freeGameAvgSpinCount10 + freeGameAvgSpinCount15 + freeGameAvgSpinCount20) / 3;
-        //Console.WriteLine($"FreeGameAvgSpinCount - avgSpinCount: {freeGameAvgSpinCount}");
+        // 프리 게임의 RTP
+        var totalBaseSpinCount = statsService.GetBaseGameTotalSpinCount();
+        var freeGameRTP = (double)totalFreeWinAmount / totalBaseSpinCount;
+        Console.WriteLine($"Free Game RTP: {freeGameRTP:F5}");
     }
 
     private void PrintSymbolDistribution() => this.gameService.PrintSymbolDistribution();
+
+    private void PrintReelStrip() => this.gameService.PrintReelStrip();
 }

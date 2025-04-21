@@ -1,15 +1,16 @@
-using LineAndFreeGame.Common;
-using LineAndFreeGame.Game;
-using LineAndFreeGame.Table;
-using LineAndFreeGame.ThreadStorage;
+using LineAndFree.Game;
+using LineAndFree.Shared;
+using LineAndFree.Table;
+using LineAndFree.ThreadStorage;
 using Microsoft.Extensions.Configuration;
 
-namespace LineAndFreeGame.Service;
+namespace LineAndFree.Service;
 
 public interface IGameService
 {
     Task SimulateSingleSpin(ThreadBuffer buffer);
     void PrintSymbolDistribution();
+    void PrintReelStrip();
 }
 
 public class GameService : IGameService
@@ -31,11 +32,17 @@ public class GameService : IGameService
     public async Task SimulateSingleSpin(ThreadBuffer buffer)
     {
         await this.baseGame.SimulateSingleSpin(buffer);
-        //await this.freeGame.ExecuteAsync(buffer, 1);
+    }
+
+    public void PrintReelStrip()
+    {
+        baseGame.PrintReelStrip();
+        freeGame.PrintReelStrip();
     }
 
     public void PrintSymbolDistribution()
     {
         baseGame.PrintSymbolDistribution();
+        freeGame.PrintSymbolDistribution();
     }
 }

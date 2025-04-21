@@ -1,21 +1,22 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using LineAndFreeGame.Common;
+using LineAndFree.Shared;
 
-namespace LineAndFreeGame.Table;
+namespace LineAndFree.Table;
 
 public record PayTableEntry(SymbolType Symbol, int Pay5, int Pay4, int Pay3);
 
 public class PayTable
 {
+    private const string PREFIX = "PayTable_";
     private const SymbolType WILD = SymbolType.WW;
     private const SymbolType SCATTER = SymbolType.SS;
 
-    private readonly ImmutableDictionary<SymbolType, PayTableEntry> payTable;    
+    private readonly ImmutableDictionary<SymbolType, PayTableEntry> payTable;
 
     public PayTable(GameDataLoader kv)
     {
-        if (!kv.TryGetValue("PayTable", out var payTableObj))
+        if (!kv.TryGetValue($"{PREFIX}PayTable", out var payTableObj))
         {
             throw new Exception("PayTable not found");
         }
@@ -102,9 +103,9 @@ public class PayTable
         return (payEntry.Symbol, consecutiveCount, pay);
     }
 
-    public int GetFreeSpinCount(int bonusSymbolCount)
+    public int GetFreeSpinCount(int scatterCount)
     {
-        if (bonusSymbolCount < 3)
+        if (scatterCount < 3)
         {
             return 0;
         }
@@ -114,7 +115,7 @@ public class PayTable
             return 0;
         }
 
-        return bonusSymbolCount switch
+        return scatterCount switch
         {
             5 => payEntry.Pay5,
             4 => payEntry.Pay4,

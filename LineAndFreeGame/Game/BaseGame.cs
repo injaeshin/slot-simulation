@@ -1,10 +1,10 @@
 using System.Runtime.CompilerServices;
 
-using LineAndFreeGame.Common;
-using LineAndFreeGame.Table;
-using LineAndFreeGame.ThreadStorage;
+using LineAndFree.Shared;
+using LineAndFree.Table;
+using LineAndFree.ThreadStorage;
 
-namespace LineAndFreeGame.Game;
+namespace LineAndFree.Game;
 
 public class BaseGame
 {
@@ -14,7 +14,7 @@ public class BaseGame
 
     public BaseGame(GameDataLoader kv, PayTable payTable)
     {
-        this.reelStrip = new ReelStrip(kv, "BaseReelStrip");
+        this.reelStrip = new ReelStrip(kv, "BaseGameReel_BaseReelStrip");
         this.payTable = payTable;
 
         this.freeGame = new FreeGame(kv, payTable);
@@ -22,25 +22,26 @@ public class BaseGame
 
     public async Task SimulateSingleSpin(ThreadBuffer buf)
     {
-        buf.LineGameClear();
-        buf.SpinStats.AddLineSpinCount();
+        buf.BaseGameClear();
+        // 베이스 게임의 스핀 카운트 증가 
+        buf.SpinStats.IncrementBaseGameSpinCount();
 
         Spin(buf);
 
-        var scatterCount = buf.GetLineScatterCount();
+        var scatterCount = buf.GetScatterCount();
         if (scatterCount >= 3)
         {
-            buf.SpinStats.AddFreeSpinTriggerCount();
-            buf.SpinStats.AddLineScatterCount(scatterCount);
-
+            // 베이스 게임의 스캐터 승리 횟수 기록
+            buf.SpinStats.RecordBaseGameScatterWin(scatterCount);
             var initFreeSpin = payTable.GetFreeSpinCount(scatterCount);
-            await freeGame.ExecuteAsync(buf, initFreeSpin);
+            await freeGame.ExecuteAsync(buf, scatterCount, initFreeSpin);
         }
 
         var (symbol, count, pay) = CalculateMiddleLinePay(buf);
         if (pay > 0)
         {
-            buf.SpinStats.AddLineGameWinPay(symbol, count, pay);
+            // 베이스 게임의 심볼 승리 금액 기록
+            buf.SpinStats.RecordBaseGameSymbolWin(symbol, count, pay);
         }
 
         await Task.CompletedTask;
@@ -92,11 +93,14 @@ public class BaseGame
         buffer.LineGameSymbols[baseIndex + row] = symbol;
     }
 
+    public void PrintReelStrip()
+    {
+        reelStrip.OutputReelStrip();
+    }
+
     public void PrintSymbolDistribution()
     {
         Console.WriteLine("Symbol distribution: Base Game");
         reelStrip.OutputSymbolDistribution();
-
-        freeGame.PrintSymbolDistribution();
     }
 }

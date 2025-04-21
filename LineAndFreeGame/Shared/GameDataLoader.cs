@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace LineAndFreeGame.Common;
+namespace LineAndFree.Shared;
 public class JsonOptions
 {
     public static JsonSerializerOptions Opt = new JsonSerializerOptions

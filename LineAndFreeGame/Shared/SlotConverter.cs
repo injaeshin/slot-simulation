@@ -1,5 +1,5 @@
 ﻿
-namespace LineAndFreeGame.Common;
+namespace LineAndFree.Shared;
 
 public class SlotConverter
 {

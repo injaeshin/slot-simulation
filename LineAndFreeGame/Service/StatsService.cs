@@ -1,7 +1,7 @@
-using LineAndFreeGame.Common;
-using LineAndFreeGame.Statistics;
+using LineAndFree.Shared;
+using LineAndFree.Statistics;
 
-namespace LineAndFreeGame.Service;
+namespace LineAndFree.Service;
 
 public class StatsService
 {
@@ -10,63 +10,130 @@ public class StatsService
     public void AddSpinStats(SpinStatistics spinStats)
     {
         this.spinStats.Add(spinStats);
-        
     }
 
-    public long GetTotalBaseSpinCount()
+    public long GetBaseGameTotalSpinCount()
     {
-        return spinStats.Sum(model => model.TotalBaseSpinCount);
+        return spinStats.Sum(model => model.BaseWinStatistics.TotalSpinCount);
     }
 
-    public long GetTotalFreeGameTriggerCount()
+    public long GetBaseGameTotalWinAmount()
     {
-        return spinStats.Sum(model => model.TotalFreeSpinTriggerCount);
+        return spinStats.Sum(model => model.BaseWinStatistics.TotalPayAmount);
     }
 
-    public long GetTotalBaseGameWinPay()
+    public long GetBaseGameTotalWinCount()
     {
-        return spinStats.Sum(model => model.LineGameWinPays.Values.Sum());
+        return spinStats.Sum(model => model.BaseWinStatistics.TotalHitCount);
     }
 
-    public long GetTotalFreeGameWinPay()
+    public long GetBaseGameTotalWinPayAmount(SymbolType symbol, int count)
     {
-        return spinStats.Sum(model => model.TotalFreeGameWinPays.Values.Sum());
-    }
-
-    public int GetLineGameTotalPayWinAmount(SymbolType symbolType, int count)
-    {
-        return spinStats.Sum(model => model.LineGameWinPays.GetValueOrDefault((symbolType, count), 0));
-    }
-
-    public int GetFreeGameTotalPayWinAmount(SymbolType symbolType, int count)
-    {
-        return spinStats.Sum(model => model.TotalFreeGameWinPays.GetValueOrDefault((symbolType, count), 0));
-    }
-
-    public double GetAvgFreeSpinExecutions(int initSpin)
-    {
-        // 전체 스핀 실행 수
-        var totalExecutions = spinStats.Sum(model => model.TotalFreeSpinCount);
-
-        // 프리스핀 실행 수
-        var totalFreeSpinExecutions = spinStats.Sum(model => model.TotalFreeSpinExecutions.Where(v => v.Item1 == initSpin).Sum(v => v.Item2));
-
-        return totalFreeSpinExecutions / totalExecutions;
-    }
-
-    public long GetTotalFreeSpinCount()
-    {
-        return spinStats.Sum(model => model.TotalFreeSpinCount);
-    }
-
-    public long GetLineScatterCount(int count)
-    {
-        return spinStats.Sum(model => count switch
+        long total = 0;
+        foreach (var model in spinStats)
         {
-            3 => model.LineScatter3Count,
-            4 => model.LineScatter4Count,
-            5 => model.LineScatter5Count,
-            _ => 0
-        });
+            total += model.BaseWinStatistics.SymbolPayAmount.GetValueOrDefault((symbol, count));
+        }
+        return total;
+    }
+
+    public long GetBaseGameTotalWinCountWithScatter(int scatterCount)
+    {
+        long total = 0;
+        foreach (var model in spinStats)
+        {
+            foreach (var kvp in model.BaseWinStatistics.ScatterWinCount)
+            {
+                if (kvp.Key == scatterCount)
+                {
+                    total += kvp.Value;
+                }
+            }
+        }
+        return total;
+    }
+
+    public long GetBaseGameTotalWinCountWithScatter()
+    {
+        long total = 0;
+        foreach (var model in spinStats)
+        {
+            foreach (var kvp in model.BaseWinStatistics.ScatterWinCount)
+            {
+                total += kvp.Value;
+            }
+        }
+        return total;
+    }
+
+    public long GetFreeGameTotalSpinCount()
+    {
+        return spinStats.Sum(model => model.FreeWinStatistics.TotalSpinCount);
+    }
+
+    public long GetFreeGameTotalWinAmount()
+    {
+        return spinStats.Sum(model => model.FreeWinStatistics.TotalPayAmount);
+    }
+
+    public long GetFreeGameWinPayAmount(SymbolType symbol, int count)
+    {
+        long total = 0;
+        foreach (var model in spinStats)
+        {
+            total += model.FreeWinStatistics.SymbolPayAmount.GetValueOrDefault((symbol, count));
+        }
+        return total;
+    }
+
+    public long GetFreeGameWinCountWithScatter(int scatterCount)
+    {
+        long total = 0;
+        foreach (var model in spinStats)
+        {
+            foreach (var kvp in model.FreeWinStatistics.ScatterWinCount)
+            {
+                if (kvp.Key == scatterCount)
+                {
+                    total += kvp.Value;
+                }
+            }
+        }
+        return total;
+    }
+
+    /// <summary>
+    /// 모든 초기 스캐터 개수별 리트리거 통계 조회
+    /// </summary>
+    /// <returns>초기 스캐터 개수 -> 리트리거 스캐터 개수 -> 발생 횟수의 중첩 Dictionary</returns>
+    public Dictionary<int, Dictionary<int, long>> GetAllFreeGameRetriggerStats()
+    {
+        var result = new Dictionary<int, Dictionary<int, long>>();
+
+        // 일반적인 초기 스캐터 개수에 대한 Dictionary 초기화
+        result[3] = new Dictionary<int, long> { [3] = 0, [4] = 0, [5] = 0 };
+        result[4] = new Dictionary<int, long> { [3] = 0, [4] = 0, [5] = 0 };
+        result[5] = new Dictionary<int, long> { [3] = 0, [4] = 0, [5] = 0 };
+
+        foreach (var model in spinStats)
+        {
+            foreach (var kvp in model.FreeWinStatistics.RetriggersDetailedCount)
+            {
+                int initialScatter = kvp.Key.InitialScatter;
+                int retriggerScatter = kvp.Key.RetriggerScatter;
+
+                // 해당 초기 스캐터 개수에 대한 Dictionary가 없으면 생성
+                if (!result.ContainsKey(initialScatter))
+                {
+                    result[initialScatter] = new Dictionary<int, long>();
+                }
+
+                // 리트리거 스캐터 개수에 대한 카운트 증가
+                result[initialScatter][retriggerScatter] =
+                    result[initialScatter].GetValueOrDefault(retriggerScatter, 0) + kvp.Value;
+            }
+        }
+
+        return result;
     }
 }

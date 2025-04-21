@@ -1,7 +1,7 @@
 
 using System.Diagnostics;
 
-namespace LineAndFreeGame.Common;
+namespace LineAndFree.Shared;
 
 public class ProgressReporter : IDisposable
 {

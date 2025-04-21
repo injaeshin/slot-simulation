@@ -1,31 +1,28 @@
 using System.Runtime.CompilerServices;
-using LineAndFreeGame.Common;
-using LineAndFreeGame.Table;
-using LineAndFreeGame.ThreadStorage;
+using LineAndFree.Shared;
+using LineAndFree.Table;
+using LineAndFree.ThreadStorage;
 
-namespace LineAndFreeGame.Game;
+namespace LineAndFree.Game;
 
 public class FreeGame
 {
     private readonly PayTable payTable;
     private readonly ReelStrip reelStrip;
 
-
     public FreeGame(GameDataLoader kv, PayTable payTable)
     {
         this.payTable = payTable;
-        this.reelStrip = new ReelStrip(kv, "FreeReelStrip");
+        this.reelStrip = new ReelStrip(kv, "FreeGameReel_FreeReelStrip");
     }
 
-    public async Task ExecuteAsync(ThreadBuffer buf, int initFreeSpin)
+    public async Task ExecuteAsync(ThreadBuffer buf, int initScatterCount, int initFreeSpin)
     {
         var execSpinCount = 0;
         var remainSpinCount = initFreeSpin;
         while (remainSpinCount > 0)
         {
-            buf.SpinStats.AddFreeSpinCount();
-
-            if (execSpinCount > 100)
+            if (execSpinCount > 500)
             {
                 throw new Exception("Spin count is too high");
             }
@@ -33,25 +30,63 @@ public class FreeGame
             execSpinCount++;
             remainSpinCount--;
 
-            Spin(buf);
+            // 프리 게임의 스핀 카운트 증가 
+            buf.SpinStats.IncrementSpinCountByScatter(initScatterCount);
 
-            var (symbol, count, pay) = CalculateMiddleLinePay(buf);
-            if (pay > 0)
-            {
-                buf.SpinStats.AddFreeGameWinPay(symbol, count, pay);
-            }
+            Spin(buf);
 
             var scatterCount = buf.GetFreeScatterCount();
             if (scatterCount >= 3)
             {
-                //remainSpinCount += payTable.GetFreeSpinCount(buf.FreeGameScatterCount);
+                // 프리 게임의 스캐터 승리 횟수 기록
+                buf.SpinStats.RecordFreeGameScatterWin(scatterCount);
+                buf.SpinStats.RecordFreeGameRetrigger(initScatterCount, scatterCount);
+                remainSpinCount += payTable.GetFreeSpinCount(scatterCount);
+            }
+
+            var (symbol, count, pay) = CalculateMiddleLinePay(buf);
+            if (pay > 0)
+            {
+                // 프리 게임의 심볼 승리 금액 기록
+                buf.SpinStats.RecordFreeGameSymbolWin(symbol, count, pay);
             }
         }
 
-        buf.SpinStats.AddExecFreeSpinCount(initFreeSpin, execSpinCount);
-
         await Task.CompletedTask;
     }
+
+    //public async Task SimulateSingleSpin(ThreadBuffer buf, int initFreeSpin = 1)
+    //{
+    //    var execSpinCount = 0;
+    //    var remainSpinCount = initFreeSpin;
+    //    while (remainSpinCount > 0)
+    //    {
+    //        if (execSpinCount > 500)
+    //        {
+    //            throw new Exception("Spin count is too high");
+    //        }
+    //        execSpinCount++;
+    //        remainSpinCount--;
+    //        // 프리 게임의 스핀 카운트 증가 
+    //        buf.SpinStats.IncrementSpinCountByScatter(1);
+    //        Spin(buf);
+    //        var scatterCount = buf.GetFreeScatterCount();
+    //        if (scatterCount >= 3)
+    //        {
+    //            // 프리 게임의 스캐터 승리 횟수 기록
+    //            buf.SpinStats.RecordFreeGameScatterWin(scatterCount);
+    //            buf.SpinStats.RecordFreeGameRetrigger(1, scatterCount);
+    //            remainSpinCount += payTable.GetFreeSpinCount(scatterCount);
+    //        }
+    //        var (symbol, count, pay) = CalculateMiddleLinePay(buf);
+    //        if (pay > 0)
+    //        {
+    //            // 프리 게임의 심볼 승리 금액 기록
+    //            buf.SpinStats.RecordFreeGameSymbolWin(symbol, count, pay);
+    //        }
+    //    }
+    //    await Task.CompletedTask;
+    //}
 
     private (SymbolType symbol, int count, int pay) CalculateMiddleLinePay(ThreadBuffer buf)
     {
@@ -97,6 +132,11 @@ public class FreeGame
         pos = pos >= reelLength ? pos - reelLength : pos;
         var symbol = strip[pos];
         buffer.FreeGameSymbols[baseIndex + row] = symbol;
+    }
+
+    public void PrintReelStrip()
+    {
+        reelStrip.OutputReelStrip();
     }
 
     public void PrintSymbolDistribution()

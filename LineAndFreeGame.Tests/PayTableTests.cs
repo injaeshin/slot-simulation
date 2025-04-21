@@ -1,8 +1,8 @@
 using System.Text.Json;
-using LineAndFreeGame.Common;
-using LineAndFreeGame.Table;
+using LineAndFree.Shared;
+using LineAndFree.Table;
 
-namespace LineAndFreeGame.Tests;
+namespace LineAndFree.Tests;
 
 public class PayTableTests
 {
@@ -38,12 +38,6 @@ public class PayTableTests
     }
 
     [Theory]
-    /*
-     * [InlineData(new[] { "BB", "BB", "BB" }, 3, 20)]  // 기본 3매칭
-        [InlineData(new[] { "WW", "BB", "BB" }, 3, 20)]  // 중복 앞쪽
-        [InlineData(new[] { "BB", "WW", "BB" }, 3, 20)]  // 추가 앞쪽
-        [InlineData(new[] { "BB", "BB", "WW" }, 3, 20)]  // 중복 중간
-    */
     [InlineData(new[] { SymbolType.BB, SymbolType.BB, SymbolType.BB, SymbolType.CC, SymbolType.WW }, SymbolType.BB, 3, 20)]
     [InlineData(new[] { SymbolType.WW, SymbolType.BB, SymbolType.BB, SymbolType.CC, SymbolType.CC }, SymbolType.BB, 3, 20)]
     [InlineData(new[] { SymbolType.BB, SymbolType.WW, SymbolType.BB, SymbolType.CC, SymbolType.WW }, SymbolType.BB, 3, 20)]

@@ -1,7 +1,7 @@
 
-using LineAndFreeGame.Common;
+using LineAndFree.Shared;
 
-namespace LineAndFreeGame.Table;
+namespace LineAndFree.Table;
 
 public class ReelStrip : Base1DReelSet
 {

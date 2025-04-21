@@ -2,9 +2,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
-using LineAndFreeGame.Service;
+using LineAndFree.Service;
 
-namespace LineAndFreeGame;
+namespace LineAndFree;
 
 public static class Program
 {

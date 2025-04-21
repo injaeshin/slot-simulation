@@ -1,7 +1,7 @@
-using LineAndFreeGame.Common;
-using LineAndFreeGame.Statistics;
+using LineAndFree.Shared;
+using LineAndFree.Statistics;
 
-namespace LineAndFreeGame.ThreadStorage;
+namespace LineAndFree.ThreadStorage;
 
 public class ThreadBuffer
 {
@@ -11,18 +11,18 @@ public class ThreadBuffer
     private SpinStatistics spinStats = new();
     public SpinStatistics SpinStats => spinStats;
 
-    private readonly SymbolType[] lineGameSymbols = new SymbolType[5 * 3];
-    public SymbolType[] LineGameSymbols => lineGameSymbols;
+    private readonly SymbolType[] baseGameSymbols = new SymbolType[5 * 3];
+    public SymbolType[] LineGameSymbols => baseGameSymbols;
 
     private readonly SymbolType[] freeGameSymbols = new SymbolType[5 * 3];
     public SymbolType[] FreeGameSymbols => freeGameSymbols;
 
-    public int GetLineScatterCount()
+    public int GetScatterCount()
     {
         var scatterCount = 0;
-        for (int i = 0; i < lineGameSymbols.Length; i++)
+        for (int i = 0; i < baseGameSymbols.Length; i++)
         {
-            if (lineGameSymbols[i] == SymbolType.SS)
+            if (baseGameSymbols[i] == SymbolType.SS)
             {
                 scatterCount++;
             }
@@ -44,12 +44,12 @@ public class ThreadBuffer
         return scatterCount;
     }
 
-    public void LineGameClear()
+    public void BaseGameClear()
     {
-        Array.Clear(lineGameSymbols);
+        Array.Clear(baseGameSymbols);
     }
-    
-    public void FreeClear()
+
+    public void FreeGameClear()
     {
         Array.Clear(freeGameSymbols);
     }

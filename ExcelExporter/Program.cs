@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Xml.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -82,7 +83,7 @@ public class Application
                     continue;
                 }
 
-                dt.TableName = $"{rangeName}";
+                dt.TableName = $"{sheetName.Replace(" ", "")}_{rangeName.Replace(" ", "")}";
 
                 if (!writer.AddDataAsColumnBase(dt))
                 {

@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 
-using LineAndFreeGame.Common;
+using LineAndFree.Shared;
 
-namespace LineAndFreeGame.Table;
+namespace LineAndFree.Table;
 
 public class Base1DReelSet
 {
@@ -54,11 +54,51 @@ public class Base1DReelSet
         return (rawReelLengths[idx], rawReelStrips[idx]);
     }
 
+    public void OutputReelStrip()
+    {
+        Console.WriteLine("Reel strip: Base Game");
+        Console.WriteLine("\t\tReel 1\tReel 2\tReel 3\tReel 4\tReel 5");
+        Console.WriteLine(new string('-', 50));
+
+        // 각 릴의 최대 길이 찾기
+        var maxLength = rawReelLengths.Max();
+
+        // 각 행별로 출력
+        for (int row = 0; row < maxLength; row++)
+        {
+            Console.Write($"{row + 1,-4}");
+            for (int reel = 0; reel < rawReelStrips.Count; reel++)
+            {
+                var symbol = row < rawReelLengths[reel] ? rawReelStrips[reel][row] : "";
+                Console.Write($"\t{symbol}");
+            }
+            Console.WriteLine();
+        }
+
+        // Total 출력
+        Console.WriteLine(new string('-', 50));
+        Console.Write("Total\t");
+        for (int reel = 0; reel < rawReelStrips.Count; reel++)
+        {
+            Console.Write($"\t{rawReelLengths[reel]}");
+        }
+        Console.WriteLine();
+
+        // Cycle 계산 및 출력
+        long cycle = 1;
+        for (int i = 0; i < rawReelStrips.Count; i++)
+        {
+            cycle *= rawReelLengths[i];
+        }
+
+        Console.WriteLine($"\t\t\tCycle\t {cycle:N0}");
+        Console.WriteLine();
+    }
+
     public void OutputSymbolDistribution()
     {
         var reels = rawReelStrips;
 
-        Console.WriteLine("\n심볼 분포:");
         Console.WriteLine("\t\tReel 1\tReel 2\tReel 3\tReel 4\tReel 5");
         Console.WriteLine(new string('-', 50));
 
